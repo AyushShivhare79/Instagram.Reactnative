@@ -5,7 +5,6 @@ import {
 import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
-
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Signin() {

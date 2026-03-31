@@ -2,30 +2,46 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
 } from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { useState } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { Alert, TouchableOpacity } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
-
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Signup() {
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const signupUser = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password.');
+      return;
+    }
+
     const response = await createUserWithEmailAndPassword(
       getAuth(),
       email,
       password,
     );
 
-    console.log('Response: ', response);
+    await firestore().collection('users').doc(response.user.uid).set({
+      username: username,
+      name: name,
+      email: response.user.email,
+      uid: response.user.uid,
+      createdAt: firestore.FieldValue.serverTimestamp(),
+    });
   };
 
   return (
     <SafeAreaView>
+      <TextInput label="Username" value={username} onChangeText={setUsername} />
+      <TextInput label="Name" value={name} onChangeText={setName} />
       <TextInput label="Email" value={email} onChangeText={setEmail} />
       <TextInput label="Password" value={password} onChangeText={setPassword} />
+
       <TouchableOpacity
         onPress={signupUser}
         style={{
