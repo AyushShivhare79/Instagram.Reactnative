@@ -1,9 +1,9 @@
 import ImageKit from 'imagekit-javascript';
+import { IMAGEKIT_URL_ENDPOINT } from '@env';
 
-const imagekitConfigOptions = { urlEndpoint };
-if (publicKey) imagekitConfigOptions.publicKey = publicKey;
-if (authenticationEndpoint)
-  imagekitConfigOptions.authenticationEndpoint = authenticationEndpoint;
+const imagekitConfigOptions = {
+  urlEndpoint: IMAGEKIT_URL_ENDPOINT,
+};
 
 const imagekit = new ImageKit(imagekitConfigOptions);
 
@@ -20,15 +20,15 @@ const getImagekitUrlFromSrc = function (imageSrc, transformationArray) {
 const getImagekitUrlFromPath = function (
   imagePath,
   transformationArray,
-  transformationPostion,
+  transformationPosition,
 ) {
   const ikOptions = {
-    urlEndpoint,
+    urlEndpoint: IMAGEKIT_URL_ENDPOINT,
     path: imagePath,
     transformation: transformationArray,
   };
-  if (transformationPostion)
-    ikOptions.transformationPostion = transformationPostion;
+  if (transformationPosition)
+    ikOptions.transformationPosition = transformationPosition;
 
   const imageURL = imagekit.url(ikOptions);
 

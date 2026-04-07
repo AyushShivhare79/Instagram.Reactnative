@@ -1,13 +1,21 @@
-import { Text } from 'react-native';
-import { FontAwesome } from '@react-native-vector-icons/fontawesome';
+import { FlatList } from 'react-native';
+import { Images } from '../../assets/images/index';
+import { Avatar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
 
 export default function Home() {
+  const [status, setStatus] = useState(Array(5).fill({}));
+
   return (
-    <SafeAreaView>
-      <FontAwesome name="plus" color="black" />
-      <Text>Instagram</Text>
-      <FontAwesome name="heart" color="black" />
+    <SafeAreaView style={{ flexDirection: 'row' }}>
+      <FlatList
+        data={status}
+        keyExtractor={(_, index) => String(index)}
+        renderItem={({ item: _item }) => (
+          <Avatar.Image size={24} source={Images.status} />
+        )}
+      />
     </SafeAreaView>
   );
 }

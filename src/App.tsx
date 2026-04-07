@@ -1,3 +1,4 @@
+import 'react-native-url-polyfill/auto';
 import { NavigationContainer } from '@react-navigation/native';
 import 'react-native-url-polyfill/auto';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -66,16 +67,24 @@ export default function MyStack() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
-          <Stack.Screen name="Home" component={MyTabs} />
-        ) : (
-          <>
-            <Stack.Screen name="Signup" component={Signup} />
-            <Stack.Screen name="Signin" component={Signin} />
-          </>
-        )}
-      </Stack.Navigator>
+      {user ? MainStack() : AuthStack()}
     </NavigationContainer>
   );
 }
+
+const MainStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Home" component={MyTabs} />
+    </Stack.Navigator>
+  );
+};
+
+const AuthStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Signup" component={Signup} />
+      <Stack.Screen name="Signin" component={Signin} />
+    </Stack.Navigator>
+  );
+};

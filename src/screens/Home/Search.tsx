@@ -58,7 +58,7 @@ export default function SearchTab() {
               borderBottomColor: '#ccc',
             }}
           >
-            <Text>{item.}</Text>
+            <Text>{item}</Text>
           </View>
         )}
       />

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function Upload() {
   return (
     <SafeAreaView>
-      <Text></Text>
+      <Text>Upload</Text>
     </SafeAreaView>
   );
 }
