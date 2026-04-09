@@ -10,10 +10,11 @@ export default function Home() {
   return (
     <SafeAreaView style={{ flexDirection: 'row' }}>
       <FlatList
+        contentContainerStyle={{ flexDirection: 'row', gap: 10 }}
         data={status}
         keyExtractor={(_, index) => String(index)}
         renderItem={({ item: _item }) => (
-          <Avatar.Image size={24} source={Images.status} />
+          <Avatar.Image size={70} source={Images.status} />
         )}
       />
     </SafeAreaView>

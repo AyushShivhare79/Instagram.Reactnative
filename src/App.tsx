@@ -15,6 +15,7 @@ import Signin from './screens/Auth/Signin';
 import { useEffect, useState } from 'react';
 import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { useColorScheme } from 'react-native';
+import { Icons } from './assets/Icons';
 
 export type BottomTabParamList = {
   Home: undefined;
@@ -26,12 +27,35 @@ export type BottomTabParamList = {
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
-const SearchIcon = ({ focused }: { focused: boolean }) => <Search />;
+const HomeIcon = ({ focused }: { focused: boolean }) => <Icons.HouseIcon />;
+const ReelsIcon = ({ focused }: { focused: boolean }) => <Icons.ReelsIcon />;
+const MessageIcon = ({ focused }: { focused: boolean }) => <Icons.SendIcon />;
+const SearchIcon = ({ focused }: { focused: boolean }) => <Icons.SearchIcon />;
 
 function MyTabs() {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen
+        options={{
+          tabBarIcon: HomeIcon,
+        }}
+        name="Home"
+        component={Home}
+      />
+      <Tab.Screen
+        options={{
+          tabBarIcon: ReelsIcon,
+        }}
+        name="Reels"
+        component={Home}
+      />
+      <Tab.Screen
+        options={{
+          tabBarIcon: MessageIcon,
+        }}
+        name="Message"
+        component={SearchTab}
+      />
       <Tab.Screen
         options={{
           tabBarIcon: SearchIcon,
@@ -39,8 +63,6 @@ function MyTabs() {
         name="Search"
         component={SearchTab}
       />
-      <Tab.Screen name="Upload" component={Upload} />
-      <Tab.Screen name="Notifications" component={Notifications} />
       <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
   );
