@@ -15,10 +15,11 @@ import { useState } from 'react';
 import { Icons } from '../../assets/Icons/index';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/App';
 
 const openLibrary = async () => {
   try {
-    requestPermission();
+    const granted = await requestPermission();
 
     const options = {
       mediaType: 'photo',
@@ -57,15 +58,11 @@ export default function Home() {
 
   const [status, setStatus] = useState(Array(10).fill({}));
 
-  const data = [
-    {
-      username: '',
-      profileImage: '',
-    },
-  ];
-
-  const handleUpload = () => {
-    const response = openLibrary();
+  const handleUpload = async () => {
+    const result = await openLibrary();
+    const uri = result?.uri;
+    if (!uri) return;
+    navigation.navigate('Upload', { url: uri });
   };
 
   return (

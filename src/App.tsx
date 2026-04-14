@@ -87,10 +87,10 @@ function MyTabs() {
 
 export type RootStackParamList = {
   Home: undefined;
-  Upload: undefined;
+  Upload: { url: string };
 };
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function MyStack() {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>();
