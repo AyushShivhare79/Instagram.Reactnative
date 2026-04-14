@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   Heart,
   House,
   Plus,
@@ -14,4 +15,5 @@ export const Icons = {
   SendIcon: () => <Send />,
   PlusIcon: () => <Plus />,
   HeartIcon: () => <Heart />,
+  ArrowLeftIcon: () => <ArrowLeft />,
 };

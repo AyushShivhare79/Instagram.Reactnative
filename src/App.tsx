@@ -15,6 +15,7 @@ import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { Icons } from './assets/Icons';
 import { Avatar, PaperProvider } from 'react-native-paper';
 import Upload from './screens/Upload/Upload';
+import CustomHeader from './components/Appbar';
 
 export type BottomTabParamList = {
   Home: undefined;
@@ -120,7 +121,14 @@ const MainStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={MyTabs} />
-      <Stack.Screen name="Upload" component={Upload} />
+      <Stack.Screen
+        name="Upload"
+        options={{
+          headerShown: true,
+          header: props => <CustomHeader title="New Post" />,
+        }}
+        component={Upload}
+      />
     </Stack.Navigator>
   );
 };
