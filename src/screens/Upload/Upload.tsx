@@ -11,16 +11,22 @@ import firestore from '@react-native-firebase/firestore';
 import { useAppSelector } from '../../hooks/redux';
 import { Toast } from '../../utils/toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useState } from 'react';
 
 type UploadProps = NativeStackScreenProps<RootStackParamList, 'Upload'>;
 
 export default function Upload({ navigation }: UploadProps) {
+  const [caption, setCaption] = useState('');
+
   const route = useRoute<RouteProp<RootStackParamList>>();
   const uri = route.params?.url;
 
   const user = useAppSelector(state => state.user.items);
 
   const handleUpload = async () => {
+    if (caption.length <= 0)
+      return Toast.error({ title: 'Please enter caption!' });
+
     try {
       const response = await uploadToCloudinary(uri as string);
 
@@ -31,6 +37,7 @@ export default function Upload({ navigation }: UploadProps) {
       const uploadResonse = await firestore().collection('posts').add({
         userId: user?.uid,
         image: response,
+        caption: caption,
         createdAt: new Date(),
       });
 
@@ -65,6 +72,7 @@ export default function Upload({ navigation }: UploadProps) {
         </View>
 
         <TextInput
+          onChangeText={setCaption}
           style={styles.textInput}
           placeholderTextColor={COLORS.black}
           placeholder="Add a caption..."

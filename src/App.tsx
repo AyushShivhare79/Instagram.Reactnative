@@ -2,9 +2,9 @@ import 'react-native-url-polyfill/auto';
 import { NavigationContainer } from '@react-navigation/native';
 import 'react-native-url-polyfill/auto';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Home from './screens/Home/Home';
+import Home from './screens/Home/HomeTab/Home';
 import SearchTab from './screens/Home/Search';
-import Profile from './screens/Home/Profile';
+import Profile from './screens/Home/ProfileTab/Profile';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Signup from './screens/Auth/Signup';
 import Signin from './screens/Auth/Signin';
@@ -63,7 +63,7 @@ function MyTabs() {
             tabBarIcon: ReelsIcon,
           }}
           name="Reels"
-          component={Home}
+          component={SearchTab}
         />
         <Tab.Screen
           options={{

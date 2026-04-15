@@ -1,7 +1,11 @@
 import {
   ArrowLeft,
+  Bookmark,
+  EllipsisVertical,
+  Grid3x2,
   Heart,
   House,
+  MessageCircle,
   Plus,
   Search,
   Send,
@@ -16,4 +20,8 @@ export const Icons = {
   PlusIcon: () => <Plus />,
   HeartIcon: () => <Heart />,
   ArrowLeftIcon: () => <ArrowLeft />,
+  CommentIcon: () => <MessageCircle />,
+  BookmarkIcon: () => <Bookmark />,
+  ThreeDotsIcon: () => <EllipsisVertical />,
+  GridIcon: () => <Grid3x2 />,
 };
