@@ -7,16 +7,44 @@ import { styles } from './styles';
 import { COLORS } from '../../theme/color/color';
 import CustomButton from '../../components/CustomButton';
 import { uploadToCloudinary } from '../../lib/cloudnary';
+import firestore from '@react-native-firebase/firestore';
+import { useAppSelector } from '../../hooks/redux';
+import { Toast } from '../../utils/toast';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-export default function Upload() {
+type UploadProps = NativeStackScreenProps<RootStackParamList, 'Upload'>;
+
+export default function Upload({ navigation }: UploadProps) {
   const route = useRoute<RouteProp<RootStackParamList>>();
   const uri = route.params?.url;
 
-  const handleUpload = async () => {
-    const response = await uploadToCloudinary(uri as string);
+  const user = useAppSelector(state => state.user.items);
 
-    if (response) {
-      Alert.alert('Image upload sucessful!');
+  const handleUpload = async () => {
+    try {
+      const response = await uploadToCloudinary(uri as string);
+
+      if (!response) {
+        Alert.alert('Image upload sucessful!');
+      }
+
+      const uploadResonse = await firestore().collection('posts').add({
+        userId: user?.uid,
+        image: response,
+        createdAt: new Date(),
+      });
+
+      Toast.success({
+        title: 'Image uploaded!',
+      });
+
+      return navigation.goBack();
+    } catch (error) {
+      console.error(error);
+
+      return Toast.error({
+        title: 'Something went wrong!',
+      });
     }
   };
 

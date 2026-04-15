@@ -5,7 +5,11 @@ import {
   moderateVerticalScale,
 } from 'react-native-size-matters';
 
-export const s = scale;
-export const vs = verticalScale;
-export const ms = moderateScale;
-export const mvs = moderateVerticalScale;
+export const hs = (size: number) => scale(size);
+
+export const vs = (size: number) => verticalScale(size);
+
+export const ms = (size: number, factor = 0.5) => moderateScale(size, factor);
+
+export const mvs = (size: number, factor = 0.5) =>
+  moderateVerticalScale(size, factor);

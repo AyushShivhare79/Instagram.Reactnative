@@ -11,11 +11,16 @@ import Signin from './screens/Auth/Signin';
 import { Images } from './assets/images/index';
 
 import { useEffect, useState } from 'react';
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
 import { Icons } from './assets/Icons';
 import { Avatar, PaperProvider } from 'react-native-paper';
 import Upload from './screens/Upload/Upload';
 import CustomHeader from './components/Appbar';
+import { useAppDispatch, useAppSelector } from './hooks/redux';
+import { setUser } from './redux/slices/userSlice';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
+import ToastMessage from 'react-native-toast-message';
 
 export type BottomTabParamList = {
   Home: undefined;
@@ -88,32 +93,34 @@ function MyTabs() {
 
 export type RootStackParamList = {
   Home: undefined;
+  Signup: undefined;
+  Signin: undefined;
   Upload: { url: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function MyStack() {
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>();
+export function MyStack() {
   const [initializing, setInitializing] = useState(true);
+
+  const dispatch = useAppDispatch();
+  const user = useAppSelector(state => state.user.items);
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(item => {
-      setUser(item);
+      dispatch(setUser(item));
       if (initializing) setInitializing(false);
     });
 
     return subscriber;
-  }, [initializing]);
+  }, [dispatch, initializing]);
 
   if (initializing) return null;
 
   return (
-    <PaperProvider>
-      <NavigationContainer>
-        {user ? MainStack() : AuthStack()}
-      </NavigationContainer>
-    </PaperProvider>
+    <NavigationContainer>
+      {user ? MainStack() : AuthStack()}
+    </NavigationContainer>
   );
 }
 
@@ -125,7 +132,7 @@ const MainStack = () => {
         name="Upload"
         options={{
           headerShown: true,
-          header: props => <CustomHeader title="New Post" />,
+          header: () => <CustomHeader title="New Post" />,
         }}
         component={Upload}
       />
@@ -141,3 +148,14 @@ const AuthStack = () => {
     </Stack.Navigator>
   );
 };
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <PaperProvider>
+        <ToastMessage />
+        <MyStack />
+      </PaperProvider>
+    </Provider>
+  );
+}

@@ -1,3 +1,4 @@
+import { hs, vs } from '../../theme/size/size';
 import { COLORS } from '../../theme/color/color';
 import { StyleSheet } from 'react-native';
 
@@ -6,10 +7,10 @@ export const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
     justifyContent: 'space-between',
-    paddingVertical: 50,
+    paddingVertical: vs(50),
     padding: 10,
   },
-  secondContainer: { gap: 30 },
+  secondContainer: { gap: vs(30), paddingHorizontal: hs(10) },
   imagePosition: {
     width: '100%',
     justifyContent: 'center',
