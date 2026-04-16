@@ -4,27 +4,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Grid3x2 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { styles } from './styles';
-import { useAppSelector } from '@/hooks/redux';
+import { useAppSelector } from '../../../hooks/redux';
 import firestore from '@react-native-firebase/firestore';
+import FastImage from '@d11/react-native-fast-image';
+import { Icons } from '../../../assets/Icons/index';
+import { Images } from '../../../assets/images/index';
+import { Divider } from 'react-native-paper';
+import { TopTabs } from '../../../App';
 
 export default function Profile() {
-  const [posts, setPosts] = useState([{}]);
 
-  const user = useAppSelector(state => state.user.items);
-
-  const fetchPost = async () => {
-    const postSnapshot = await firestore()
-      .collection('posts')
-      .orderBy('createdAt', 'desc')
-      .doc(user?.uid)
-      .get();
-  };
-
-  useEffect(() => {}, []);
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.topContainer}>
-        <Text>Image</Text>
+        <View style={styles.imageContainer}>
+          <FastImage
+            style={[styles.image, styles.profilePicture]}
+            source={Images.status}
+            resizeMode={FastImage.resizeMode.cover}
+          />
+        </View>
 
         <View>
           <Text>10</Text>
@@ -42,17 +41,23 @@ export default function Profile() {
         </View>
       </View>
 
-      <CustomButton title="Edit Profile" />
       <View>
         <Text>{}</Text>
         <Text>Bio</Text>
       </View>
 
-      <View>
-        <Grid3x2 />
+      <CustomButton title="Edit Profile" />
+
+      <Divider />
+
+      <View style={{ flex: 1 }}>
+        <TopTabs />
       </View>
 
-      <FlatList />
+      {/* <View>
+        <Grid3x2 />
+        <Icons.UserIcon />
+      </View> */}
     </SafeAreaView>
   );
 }

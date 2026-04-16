@@ -9,6 +9,7 @@ import {
   Plus,
   Search,
   Send,
+  SquareUser,
   TvMinimalPlay,
 } from 'lucide-react-native';
 
@@ -24,4 +25,5 @@ export const Icons = {
   BookmarkIcon: () => <Bookmark />,
   ThreeDotsIcon: () => <EllipsisVertical />,
   GridIcon: () => <Grid3x2 />,
+  UserIcon: () => <SquareUser />,
 };
