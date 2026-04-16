@@ -1,9 +1,15 @@
 import {
+  ArrowLeft,
+  Bookmark,
+  EllipsisVertical,
+  Grid3x2,
   Heart,
   House,
+  MessageCircle,
   Plus,
   Search,
   Send,
+  SquareUser,
   TvMinimalPlay,
 } from 'lucide-react-native';
 
@@ -14,4 +20,10 @@ export const Icons = {
   SendIcon: () => <Send />,
   PlusIcon: () => <Plus />,
   HeartIcon: () => <Heart />,
+  ArrowLeftIcon: () => <ArrowLeft />,
+  CommentIcon: () => <MessageCircle />,
+  BookmarkIcon: () => <Bookmark />,
+  ThreeDotsIcon: () => <EllipsisVertical />,
+  GridIcon: () => <Grid3x2 />,
+  UserIcon: () => <SquareUser />,
 };

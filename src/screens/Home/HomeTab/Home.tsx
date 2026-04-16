@@ -1,0 +1,206 @@
+import { Timestamp } from 'firebase/firestore';
+import {
+  FlatList,
+  PermissionsAndroid,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { Images } from '../../../assets/images/index';
+import { Avatar } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect, useState } from 'react';
+import { Icons } from '../../../assets/Icons/index';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/App';
+import firestore from '@react-native-firebase/firestore';
+import { Toast } from '../../../utils/toast';
+import FastImage from '@d11/react-native-fast-image';
+import { COLORS } from '../../../theme/color/color';
+import { EllipsisVertical } from 'lucide-react-native';
+import { styles } from './styles';
+
+const openLibrary = async () => {
+  try {
+    const granted = await requestPermission();
+
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+      selectionLimit: 1,
+    };
+
+    const result = await launchImageLibrary(options);
+
+    if (result.didCancel) return;
+
+    if (result.errorCode) {
+      console.log('Error:', result.errorMessage);
+      return;
+    }
+
+    if (result.assets?.length) {
+      const asset = result.assets[0];
+
+      const img = {
+        uri: asset.uri,
+        type: asset.type || 'image/jpeg',
+        name: asset.fileName || `photo_${Date.now()}.jpg`,
+      };
+
+      return img;
+    }
+  } catch (err) {
+    console.log('Picker Error:', err);
+  }
+};
+
+type user = {
+  uid: string;
+  email: string;
+  name: string;
+  username: string;
+};
+interface Posts {
+  id: string;
+  image: string;
+  user: user;
+  userId: string;
+  createdAt: Timestamp;
+}
+
+export default function Home() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const [status, setStatus] = useState(Array(10).fill({}));
+  const [posts, setPosts] = useState<Posts[]>();
+
+  const getPosts = async () => {
+    try {
+      const postSnapshot = await firestore()
+        .collection('posts')
+        .orderBy('createdAt', 'desc')
+        .get();
+
+      const rawPosts = postSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const userIds = [...new Set(rawPosts.map(post => post?.userId))];
+
+      const userDocs = await Promise.all(
+        userIds.map(id => firestore().collection('users').doc(id).get()),
+      );
+
+      const userMap = {};
+
+      userDocs.forEach(doc => {
+        if (doc.exists) {
+          userMap[doc.id] = doc.data();
+        }
+      });
+
+      const finalData = rawPosts.map(post => ({
+        ...post,
+        user: userMap[post.userId] || null,
+      }));
+
+      console.log('Final data: ', finalData);
+      setPosts(finalData);
+    } catch (error) {
+      console.log('Error:', error);
+    }
+  };
+
+  useEffect(() => {
+    getPosts();
+  }, []);
+
+  const handleUpload = async () => {
+    const result = await openLibrary();
+    const uri = result?.uri;
+    if (!uri) return;
+    navigation.navigate('Upload', { url: uri });
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.headerStyle}>
+        <TouchableOpacity onPress={handleUpload}>
+          <Icons.PlusIcon />
+        </TouchableOpacity>
+        <Text>Instagram</Text>
+        <Icons.HeartIcon />
+      </View>
+
+      <FlatList
+        horizontal={true}
+        contentContainerStyle={styles.flatListStatusContainer}
+        data={status}
+        keyExtractor={(_, index) => String(index)}
+        renderItem={({ item: _item }) => (
+          <Avatar.Image size={70} source={Images.status} />
+        )}
+      />
+
+      <FlatList
+        contentContainerStyle={{ paddingVertical: 10 }}
+        data={posts}
+        keyExtractor={(_, index) => String(index)}
+        renderItem={({ item }) => {
+          return (
+            <View>
+              <View style={styles.postHeader}>
+                <View style={styles.postHeaderLeft}>
+                  <Avatar.Image size={40} source={Images.status} />
+                  <Text>{item.user.username}</Text>
+                </View>
+
+                <EllipsisVertical />
+              </View>
+
+              <View style={styles.imageOuterBox}>
+                <View style={styles.imageContainer}>
+                  <FastImage
+                    style={styles.image}
+                    source={{
+                      uri: item.image,
+                      priority: FastImage.priority.normal,
+                    }}
+                    resizeMode={FastImage.resizeMode.cover}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.bottomIcons}>
+                <View style={styles.bottomLeftIcons}>
+                  <Icons.HeartIcon />
+                  <Icons.CommentIcon />
+                  <Icons.SendIcon />
+                </View>
+                <Icons.BookmarkIcon />
+              </View>
+              <Text>Caption</Text>
+            </View>
+          );
+        }}
+      />
+    </SafeAreaView>
+  );
+}
+
+const requestPermission = async () => {
+  if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+    );
+
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  }
+  return true;
+};

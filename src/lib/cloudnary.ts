@@ -9,10 +9,11 @@ export const uploadToCloudinary = async (imageUri: string) => {
     name: 'upload.jpg',
   });
 
-  formData.append('upload_preset', CLOUD_PRESET);
-  formData.append('cloud_name', CLOUD_NAME);
+  formData.append('upload_preset', CLOUD_PRESET.toString());
+  formData.append('cloud_name', CLOUD_NAME.toString());
 
   try {
+    console.log("Form: ", formData)
     const response = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
       {

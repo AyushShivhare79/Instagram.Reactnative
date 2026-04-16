@@ -2,10 +2,6 @@
 #
 .DS_Store
 
-# Mine
-.env
-google-services.json
-
 # Xcode
 #
 build/
@@ -77,3 +73,9 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+
+# Mine
+.env
+google-services.json
