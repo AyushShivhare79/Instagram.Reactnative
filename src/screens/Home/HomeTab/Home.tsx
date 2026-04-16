@@ -15,11 +15,9 @@ import { useEffect, useState } from 'react';
 import { Icons } from '../../../assets/Icons/index';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/App';
+import { RootStackParamList } from '../../../App';
 import firestore from '@react-native-firebase/firestore';
-import { Toast } from '../../../utils/toast';
 import FastImage from '@d11/react-native-fast-image';
-import { COLORS } from '../../../theme/color/color';
 import { EllipsisVertical } from 'lucide-react-native';
 import { styles } from './styles';
 

@@ -1,4 +1,4 @@
-import { useAppSelector } from '@/hooks/redux';
+import { useAppSelector } from '../../../../hooks/redux';
 import { useEffect, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import firestore from '@react-native-firebase/firestore';

@@ -1,4 +1,4 @@
-import { RootStackParamList } from '@/App';
+import { RootStackParamList } from '../../App';
 import FastImage from '@d11/react-native-fast-image';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Alert, TextInput, View } from 'react-native';
