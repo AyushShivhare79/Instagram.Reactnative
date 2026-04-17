@@ -1,8 +1,20 @@
-import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Timestamp } from 'firebase/firestore';
+
+export interface AppUser {
+  uid: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  profilePicture: string | null;
+  following: string[];
+  followers: string[];
+  createdAt: Timestamp | null;
+}
 
 interface UserState {
-  items: FirebaseAuthTypes.User | null;
+  items: AppUser | null;
 }
 
 const initialState: UserState = {

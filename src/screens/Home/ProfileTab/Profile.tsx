@@ -1,4 +1,3 @@
-import firestore from '@react-native-firebase/firestore';
 import { Text, View } from 'react-native';
 import CustomButton from '@/components/CustomButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,24 +5,22 @@ import { styles } from './styles';
 import FastImage from '@d11/react-native-fast-image';
 import { Images } from '@/assets/images/index';
 import { Divider } from 'react-native-paper';
-import { TopTabs } from '@/App';
 import { useAppSelector } from '@/hooks/redux';
-import { useEffect, useState } from 'react';
+import auth from '@react-native-firebase/auth';
+import { TopTabs } from '@/navigation/TopTabNavigation';
+import Toast from 'react-native-toast-message';
 
 export default function Profile() {
-  const [user, setUser] = useState();
-  const userId = useAppSelector(state => state.user.items?.uid);
+  const user = useAppSelector(state => state.user.items);
 
-  const fetchUser = async () => {
-    const response = await firestore().collection('users').doc(userId).get();
-
-    setUser(response._data);
+  const handleLogout = async () => {
+    try {
+      await auth().signOut();
+      console.log('User signed out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
-  console.log('User: ', user);
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,23 +34,25 @@ export default function Profile() {
         </View>
 
         <View>
-          <Text style={styles.countText}>10</Text>
+          <Text style={styles.countText}></Text>
           <Text style={styles.labelText}>Posts</Text>
         </View>
 
         <View>
-          <Text style={styles.countText}>832</Text>
+          <Text style={styles.countText}>{user?.followers.length}</Text>
           <Text style={styles.labelText}>Followers</Text>
         </View>
 
         <View>
-          <Text style={styles.countText}>100</Text>
+          <Text style={styles.countText}>{user?.following.length}</Text>
           <Text style={styles.labelText}>Following</Text>
         </View>
       </View>
 
       <View>
-        <Text style={{ color: 'black', fontWeight: '700' }}>{user?.name}</Text>
+        <Text style={{ color: 'black', fontWeight: '700' }}>
+          {user?.firstName}
+        </Text>
         <Text>No bio</Text>
       </View>
 

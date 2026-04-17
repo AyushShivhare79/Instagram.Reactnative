@@ -15,12 +15,13 @@ import { useEffect, useState } from 'react';
 import { Icons } from '@/assets/Icons/index';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/App';
 import firestore from '@react-native-firebase/firestore';
 import FastImage from '@d11/react-native-fast-image';
 import { styles } from './styles';
 import CustomButton from '@/components/CustomButton';
-import { useAppSelector } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { RootStackParamList } from '@/navigation/StackNavigation';
+import { setUser } from '@/redux/slices/userSlice';
 
 const openLibrary = async () => {
   try {
@@ -77,12 +78,33 @@ export default function Home() {
 
   const [status, setStatus] = useState(Array(10).fill({}));
   const [posts, setPosts] = useState<Posts[]>();
-  const [user, setUser] = useState();
 
-  const userId = useAppSelector(state => state.user.items?.uid);
+  const user = useAppSelector(state => state.user.items);
+  const dispatch = useAppDispatch();
 
-  const getUser = async () => {
-    const userData = await firestore().collection('users').doc(userId).get();
+  const handleFollow = async (targetUserId: string) => {
+    try {
+      const currentUserId = user?.uid;
+
+      console.log('TargetUserId: ', targetUserId);
+      console.log('CurrentUserId: ', currentUserId);
+
+      await firestore()
+        .collection('users')
+        .doc(currentUserId)
+        .update({
+          following: firestore.FieldValue.arrayUnion(targetUserId),
+        });
+
+      await firestore()
+        .collection('users')
+        .doc(targetUserId)
+        .update({
+          followers: firestore.FieldValue.arrayUnion(currentUserId),
+        });
+    } catch (error) {
+      console.error('Follow error:', error);
+    }
   };
 
   const getPosts = async () => {
@@ -169,7 +191,7 @@ export default function Home() {
           data={posts}
           keyExtractor={(_, index) => String(index)}
           renderItem={({ item }) => {
-            const isMe = userId === item.userId;
+            const isMe = user?.uid === item.userId;
 
             return (
               <View style={{ padding: 10 }}>
@@ -186,7 +208,13 @@ export default function Home() {
                       alignItems: 'center',
                     }}
                   >
-                    {!isMe && <CustomButton variant="outline" title="Follow" />}
+                    {!isMe && (
+                      <CustomButton
+                        onPress={() => handleFollow(item?.user.uid)}
+                        variant="outline"
+                        title="Follow"
+                      />
+                    )}
                     <Icons.ThreeDotsIcon />
                   </View>
                 </View>

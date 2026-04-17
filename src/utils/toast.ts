@@ -1,5 +1,4 @@
-import ToastMessage from 'react-native-toast-message';
-
+import Toast from 'react-native-toast-message';
 type ToastType = 'success' | 'error' | 'info';
 
 type ToastOptions = {
@@ -9,7 +8,7 @@ type ToastOptions = {
 };
 
 const show = (type: ToastType, options: ToastOptions) => {
-  ToastMessage.show({
+  Toast.show({
     type,
     text1: options.title,
     text2: options.message,
@@ -17,7 +16,7 @@ const show = (type: ToastType, options: ToastOptions) => {
   });
 };
 
-export const Toast = {
+export const ToastMessage = {
   success: (options: ToastOptions) => show('success', options),
   error: (options: ToastOptions) => show('error', options),
   info: (options: ToastOptions) => show('info', options),

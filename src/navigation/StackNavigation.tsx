@@ -9,8 +9,9 @@ import auth from '@react-native-firebase/auth';
 import Upload from '@/screens/Upload/Upload';
 import CustomHeader from '@/components/Appbar';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { setUser } from '@/redux/slices/userSlice';
+import { AppUser, setUser } from '@/redux/slices/userSlice';
 import { BottomTabs } from './BottomTabNavigation';
+import firestore from '@react-native-firebase/firestore';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -28,12 +29,15 @@ export function MyStack() {
   const user = useAppSelector(state => state.user.items);
 
   useEffect(() => {
-    const subscriber = auth().onAuthStateChanged(item => {
-      dispatch(setUser(item));
+    auth().onAuthStateChanged(async item => {
+      const userData = await firestore()
+        .collection('users')
+        .doc(item?.uid)
+        .get();
+
+      dispatch(setUser(userData?._data));
       if (initializing) setInitializing(false);
     });
-
-    return subscriber;
   }, [dispatch, initializing]);
 
   if (initializing) return null;
