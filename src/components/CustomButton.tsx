@@ -73,7 +73,7 @@ export default function CustomButton({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 14,
+    paddingVertical: 6,
     paddingHorizontal: 20,
     borderRadius: 10,
     alignItems: 'center',

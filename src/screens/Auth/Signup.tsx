@@ -9,7 +9,8 @@ import { Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Signup() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,8 +29,11 @@ export default function Signup() {
 
     await firestore().collection('users').doc(response.user.uid).set({
       username: username,
-      name: name,
+      firstName: firstName,
+      lastName: lastName,
       email: response.user.email,
+      following: 0,
+      followers: 0,
       uid: response.user.uid,
       createdAt: firestore.FieldValue.serverTimestamp(),
     });

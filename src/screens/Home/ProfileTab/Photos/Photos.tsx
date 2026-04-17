@@ -34,7 +34,7 @@ export default function Photos() {
   }, []);
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
         columnWrapperStyle={{ gap: 10 }}
         numColumns={3}

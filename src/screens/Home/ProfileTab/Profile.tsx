@@ -1,15 +1,32 @@
+import firestore from '@react-native-firebase/firestore';
 import { Text, View } from 'react-native';
-import CustomButton from '../../../components/CustomButton';
+import CustomButton from '@/components/CustomButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './styles';
 import FastImage from '@d11/react-native-fast-image';
-import { Images } from '../../../assets/images/index';
+import { Images } from '@/assets/images/index';
 import { Divider } from 'react-native-paper';
-import { TopTabs } from '../../../App';
+import { TopTabs } from '@/App';
+import { useAppSelector } from '@/hooks/redux';
+import { useEffect, useState } from 'react';
 
 export default function Profile() {
+  const [user, setUser] = useState();
+  const userId = useAppSelector(state => state.user.items?.uid);
+
+  const fetchUser = async () => {
+    const response = await firestore().collection('users').doc(userId).get();
+
+    setUser(response._data);
+  };
+  console.log('User: ', user);
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.topContainer}>
         <View style={styles.imageContainer}>
           <FastImage
@@ -20,38 +37,32 @@ export default function Profile() {
         </View>
 
         <View>
-          <Text>10</Text>
-          <Text>Posts</Text>
+          <Text style={styles.countText}>10</Text>
+          <Text style={styles.labelText}>Posts</Text>
         </View>
 
         <View>
-          <Text>832</Text>
-          <Text>Followers</Text>
+          <Text style={styles.countText}>832</Text>
+          <Text style={styles.labelText}>Followers</Text>
         </View>
 
         <View>
-          <Text>100</Text>
-          <Text>Following</Text>
+          <Text style={styles.countText}>100</Text>
+          <Text style={styles.labelText}>Following</Text>
         </View>
       </View>
 
       <View>
-        <Text>{}</Text>
-        <Text>Bio</Text>
+        <Text style={{ color: 'black', fontWeight: '700' }}>{user?.name}</Text>
+        <Text>No bio</Text>
       </View>
 
-      <CustomButton title="Edit Profile" />
-
+      <CustomButton variant="outline" title="Edit Profile" />
       <Divider />
 
-      <View style={{ flex: 1 }}>
+      <View style={styles.bottomSection}>
         <TopTabs />
       </View>
-
-      {/* <View>
-        <Grid3x2 />
-        <Icons.UserIcon />
-      </View> */}
     </SafeAreaView>
   );
 }
