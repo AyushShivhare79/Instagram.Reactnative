@@ -9,7 +9,8 @@ import { Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Signup() {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -28,8 +29,12 @@ export default function Signup() {
 
     await firestore().collection('users').doc(response.user.uid).set({
       username: username,
-      name: name,
-      email: response.user.email,
+      profilePicture: null,
+      firstName: firstName,
+      email: email,
+      lastName: lastName,
+      following: [],
+      followers: [],
       uid: response.user.uid,
       createdAt: firestore.FieldValue.serverTimestamp(),
     });
@@ -38,7 +43,16 @@ export default function Signup() {
   return (
     <SafeAreaView>
       <TextInput label="Username" value={username} onChangeText={setUsername} />
-      <TextInput label="Name" value={name} onChangeText={setName} />
+      <TextInput
+        label="First Name"
+        value={firstName}
+        onChangeText={setFirstName}
+      />
+      <TextInput
+        label="Last Name"
+        value={lastName}
+        onChangeText={setLastName}
+      />
       <TextInput label="Email" value={email} onChangeText={setEmail} />
       <TextInput label="Password" value={password} onChangeText={setPassword} />
 

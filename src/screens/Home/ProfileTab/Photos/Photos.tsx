@@ -1,4 +1,4 @@
-import { useAppSelector } from '@/hooks/redux';
+import { useAppSelector } from '../../../../hooks/redux';
 import { useEffect, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
@@ -34,7 +34,7 @@ export default function Photos() {
   }, []);
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
         columnWrapperStyle={{ gap: 10 }}
         numColumns={3}

@@ -5,6 +5,7 @@ import {
   Grid3x2,
   Heart,
   House,
+  Menu,
   MessageCircle,
   Plus,
   Search,
@@ -26,4 +27,5 @@ export const Icons = {
   ThreeDotsIcon: () => <EllipsisVertical />,
   GridIcon: () => <Grid3x2 />,
   UserIcon: () => <SquareUser />,
+  MenuIcon: () => <Menu />,
 };

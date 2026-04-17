@@ -1,4 +1,4 @@
-import { hs, vs } from '../../theme/size/size';
+import { hs, vs } from '@/theme/responsive/responsive';
 import { COLORS } from '../../theme/color/color';
 import { StyleSheet } from 'react-native';
 

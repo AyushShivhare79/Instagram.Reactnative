@@ -8,20 +8,20 @@ import {
   View,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { Images } from '../../../assets/images/index';
+import { Images } from '@/assets/images/index';
 import { Avatar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
-import { Icons } from '../../../assets/Icons/index';
+import { Icons } from '@/assets/Icons/index';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/App';
 import firestore from '@react-native-firebase/firestore';
-import { Toast } from '../../../utils/toast';
 import FastImage from '@d11/react-native-fast-image';
-import { COLORS } from '../../../theme/color/color';
-import { EllipsisVertical } from 'lucide-react-native';
 import { styles } from './styles';
+import CustomButton from '@/components/CustomButton';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { RootStackParamList } from '@/navigation/StackNavigation';
+import { setUser } from '@/redux/slices/userSlice';
 
 const openLibrary = async () => {
   try {
@@ -79,6 +79,34 @@ export default function Home() {
   const [status, setStatus] = useState(Array(10).fill({}));
   const [posts, setPosts] = useState<Posts[]>();
 
+  const user = useAppSelector(state => state.user.items);
+  const dispatch = useAppDispatch();
+
+  const handleFollow = async (targetUserId: string) => {
+    try {
+      const currentUserId = user?.uid;
+
+      console.log('TargetUserId: ', targetUserId);
+      console.log('CurrentUserId: ', currentUserId);
+
+      await firestore()
+        .collection('users')
+        .doc(currentUserId)
+        .update({
+          following: firestore.FieldValue.arrayUnion(targetUserId),
+        });
+
+      await firestore()
+        .collection('users')
+        .doc(targetUserId)
+        .update({
+          followers: firestore.FieldValue.arrayUnion(currentUserId),
+        });
+    } catch (error) {
+      console.error('Follow error:', error);
+    }
+  };
+
   const getPosts = async () => {
     try {
       const postSnapshot = await firestore()
@@ -134,62 +162,90 @@ export default function Home() {
         <TouchableOpacity onPress={handleUpload}>
           <Icons.PlusIcon />
         </TouchableOpacity>
-        <Text>Instagram</Text>
+        <View style={styles.logoContainer}>
+          <FastImage
+            style={styles.image}
+            source={Images.instaLogo}
+            resizeMode={FastImage.resizeMode.cover}
+          />
+        </View>
         <Icons.HeartIcon />
       </View>
 
-      <FlatList
-        horizontal={true}
-        contentContainerStyle={styles.flatListStatusContainer}
-        data={status}
-        keyExtractor={(_, index) => String(index)}
-        renderItem={({ item: _item }) => (
-          <Avatar.Image size={70} source={Images.status} />
-        )}
-      />
+      <View>
+        <FlatList
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.flatListStatusContainer}
+          data={status}
+          keyExtractor={(_, index) => String(index)}
+          renderItem={({ item: _item }) => (
+            <Avatar.Image size={70} source={Images.status} />
+          )}
+        />
+      </View>
 
-      <FlatList
-        contentContainerStyle={{ paddingVertical: 10 }}
-        data={posts}
-        keyExtractor={(_, index) => String(index)}
-        renderItem={({ item }) => {
-          return (
-            <View>
-              <View style={styles.postHeader}>
-                <View style={styles.postHeaderLeft}>
-                  <Avatar.Image size={40} source={Images.status} />
-                  <Text>{item.user.username}</Text>
-                </View>
+      <View>
+        <FlatList
+          contentContainerStyle={{ paddingVertical: 10 }}
+          data={posts}
+          keyExtractor={(_, index) => String(index)}
+          renderItem={({ item }) => {
+            const isMe = user?.uid === item.userId;
 
-                <EllipsisVertical />
-              </View>
+            return (
+              <View style={{ padding: 10 }}>
+                <View style={styles.postHeader}>
+                  <View style={styles.postHeaderLeft}>
+                    <Avatar.Image size={40} source={Images.status} />
+                    <Text>{item.user.username}</Text>
+                  </View>
 
-              <View style={styles.imageOuterBox}>
-                <View style={styles.imageContainer}>
-                  <FastImage
-                    style={styles.image}
-                    source={{
-                      uri: item.image,
-                      priority: FastImage.priority.normal,
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     }}
-                    resizeMode={FastImage.resizeMode.cover}
-                  />
+                  >
+                    {!isMe && (
+                      <CustomButton
+                        onPress={() => handleFollow(item?.user.uid)}
+                        variant="outline"
+                        title="Follow"
+                      />
+                    )}
+                    <Icons.ThreeDotsIcon />
+                  </View>
                 </View>
-              </View>
 
-              <View style={styles.bottomIcons}>
-                <View style={styles.bottomLeftIcons}>
-                  <Icons.HeartIcon />
-                  <Icons.CommentIcon />
-                  <Icons.SendIcon />
+                <View style={styles.imageOuterBox}>
+                  <View style={styles.imageContainer}>
+                    <FastImage
+                      style={styles.image}
+                      source={{
+                        uri: item.image,
+                        priority: FastImage.priority.normal,
+                      }}
+                      resizeMode={FastImage.resizeMode.cover}
+                    />
+                  </View>
                 </View>
-                <Icons.BookmarkIcon />
+
+                <View style={styles.bottomIcons}>
+                  <View style={styles.bottomLeftIcons}>
+                    <Icons.HeartIcon />
+                    <Icons.CommentIcon />
+                    <Icons.SendIcon />
+                  </View>
+                  <Icons.BookmarkIcon />
+                </View>
+                <Text>Caption</Text>
               </View>
-              <Text>Caption</Text>
-            </View>
-          );
-        }}
-      />
+            );
+          }}
+        />
+      </View>
     </SafeAreaView>
   );
 }
