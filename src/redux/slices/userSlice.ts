@@ -31,6 +31,34 @@ const userSlice = createSlice({
     clearUser(state) {
       state.items = null;
     },
+    followUser: (
+      state,
+      action: PayloadAction<{ currentUserId: string; targetUserId: string }>,
+    ) => {
+      const { currentUserId, targetUserId } = action.payload;
+
+      if (!state.user.following.includes(targetUserId)) {
+        state.user.following.push(targetUserId);
+      }
+    },
+
+    unfollowUser: (
+      state,
+      action: PayloadAction<{ currentUserId: string; targetUserId: string }>,
+    ) => {
+      const { currentUserId, targetUserId } = action.payload;
+
+      state.user.following = state.user.following.filter(
+        id => id !== targetUserId,
+      );
+
+      const targetUser = state.users?.[targetUserId];
+      if (targetUser) {
+        targetUser.followers = targetUser.followers.filter(
+          id => id !== currentUserId,
+        );
+      }
+    },
   },
 });
 

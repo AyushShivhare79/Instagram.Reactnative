@@ -21,7 +21,6 @@ import { styles } from './styles';
 import CustomButton from '@/components/CustomButton';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { RootStackParamList } from '@/navigation/StackNavigation';
-import { setUser } from '@/redux/slices/userSlice';
 
 const openLibrary = async () => {
   try {
@@ -68,6 +67,8 @@ interface Posts {
   id: string;
   image: string;
   user: user;
+  likes: string[];
+  caption: string;
   userId: string;
   createdAt: Timestamp;
 }
@@ -86,9 +87,6 @@ export default function Home() {
     try {
       const currentUserId = user?.uid;
 
-      console.log('TargetUserId: ', targetUserId);
-      console.log('CurrentUserId: ', currentUserId);
-
       await firestore()
         .collection('users')
         .doc(currentUserId)
@@ -102,8 +100,34 @@ export default function Home() {
         .update({
           followers: firestore.FieldValue.arrayUnion(currentUserId),
         });
+
+        // dispatch()
     } catch (error) {
       console.error('Follow error:', error);
+    }
+  };
+
+  const handleUnfollow = async (targetUserId: string) => {
+    try {
+      const currentUserId = user?.uid;
+      if (!currentUserId) return;
+
+      const batch = firestore().batch();
+
+      const currentUserRef = firestore().collection('users').doc(currentUserId);
+      const targetUserRef = firestore().collection('users').doc(targetUserId);
+
+      batch.update(currentUserRef, {
+        following: firestore.FieldValue.arrayRemove(targetUserId),
+      });
+
+      batch.update(targetUserRef, {
+        followers: firestore.FieldValue.arrayRemove(currentUserId),
+      });
+
+      await batch.commit();
+    } catch (error) {
+      console.error('Unfollow error:', error);
     }
   };
 
@@ -149,6 +173,50 @@ export default function Home() {
     getPosts();
   }, []);
 
+  const handleLike = async (postId: string, postLikes: string[]) => {
+    try {
+      const currentUserId = user?.uid;
+      if (!currentUserId) return;
+
+      const isAlreadyLiked = postLikes.includes(currentUserId);
+      const postRef = firestore().collection('posts').doc(postId);
+
+      if (isAlreadyLiked) {
+        const response = await postRef.update({
+          likes: firestore.FieldValue.arrayRemove(currentUserId),
+        });
+
+        return setPosts(prev =>
+          prev.map(post => {
+            if (post.id !== postId) return post;
+
+            return {
+              ...post,
+              likes: post.likes.filter(id => id !== currentUserId),
+            };
+          }),
+        );
+      }
+
+      const response = await postRef.update({
+        likes: firestore.FieldValue.arrayUnion(currentUserId),
+      });
+
+      setPosts(prev =>
+        prev.map(post => {
+          if (post.id !== postId) return post;
+
+          return {
+            ...post,
+            likes: [...post.likes, currentUserId],
+          };
+        }),
+      );
+    } catch (error) {
+      console.error('Like error:', error);
+    }
+  };
+
   const handleUpload = async () => {
     const result = await openLibrary();
     const uri = result?.uri;
@@ -192,6 +260,8 @@ export default function Home() {
           keyExtractor={(_, index) => String(index)}
           renderItem={({ item }) => {
             const isMe = user?.uid === item.userId;
+            const isFollow = user?.following?.includes(item?.user?.uid);
+            console.log('Yess: ', user?.following.includes(item?.user.uid));
 
             return (
               <View style={{ padding: 10 }}>
@@ -210,9 +280,13 @@ export default function Home() {
                   >
                     {!isMe && (
                       <CustomButton
-                        onPress={() => handleFollow(item?.user.uid)}
+                        onPress={() =>
+                          isFollow
+                            ? handleUnfollow(item?.user.uid)
+                            : handleFollow(item?.user.uid)
+                        }
                         variant="outline"
-                        title="Follow"
+                        title={isFollow ? 'Unfollow' : 'Follow'}
                       />
                     )}
                     <Icons.ThreeDotsIcon />
@@ -234,13 +308,27 @@ export default function Home() {
 
                 <View style={styles.bottomIcons}>
                   <View style={styles.bottomLeftIcons}>
-                    <Icons.HeartIcon />
-                    <Icons.CommentIcon />
-                    <Icons.SendIcon />
+                    <TouchableOpacity
+                      onPress={() => handleLike(item.id, item.likes)}
+                    >
+                      <Icons.HeartIcon
+                        size={28}
+                        fill={item?.likes?.includes(user?.uid) ? 'red' : 'null'}
+                      />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity>
+                      <Icons.CommentIcon size={28} />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity>
+                      <Icons.SendIcon size={28} />
+                    </TouchableOpacity>
                   </View>
                   <Icons.BookmarkIcon />
                 </View>
-                <Text>Caption</Text>
+
+                <Text>{item.caption}</Text>
               </View>
             );
           }}

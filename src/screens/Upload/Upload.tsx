@@ -36,6 +36,7 @@ export default function Upload({ navigation }: UploadProps) {
 
       const uploadResonse = await firestore().collection('posts').add({
         userId: user?.uid,
+        likes: [],
         image: response,
         caption: caption,
         createdAt: new Date(),
