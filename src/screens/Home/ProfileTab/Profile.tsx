@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native';
 import CustomButton from '@/components/CustomButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './styles';
+import { styles } from './profile.styles';
 import FastImage from '@d11/react-native-fast-image';
 import { Images } from '@/assets/images/index';
 import { Divider } from 'react-native-paper';

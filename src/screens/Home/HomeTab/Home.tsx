@@ -17,10 +17,12 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import firestore from '@react-native-firebase/firestore';
 import FastImage from '@d11/react-native-fast-image';
-import { styles } from './styles';
+import { styles } from './home.styles';
 import CustomButton from '@/components/CustomButton';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { RootStackParamList } from '@/navigation/StackNavigation';
+import { followUser, unfollowUser } from '@/redux/slices/userSlice';
+import { setPosts } from '@/redux/slices/postsSlice';
 
 const openLibrary = async () => {
   try {
@@ -63,7 +65,7 @@ type user = {
   name: string;
   username: string;
 };
-interface Posts {
+export interface Posts {
   id: string;
   image: string;
   user: user;
@@ -78,14 +80,16 @@ export default function Home() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [status, setStatus] = useState(Array(10).fill({}));
-  const [posts, setPosts] = useState<Posts[]>();
 
   const user = useAppSelector(state => state.user.items);
+  const posts = useAppSelector(state => state.posts.items);
+
   const dispatch = useAppDispatch();
 
   const handleFollow = async (targetUserId: string) => {
     try {
       const currentUserId = user?.uid;
+      if (!currentUserId || !targetUserId) return;
 
       await firestore()
         .collection('users')
@@ -101,7 +105,7 @@ export default function Home() {
           followers: firestore.FieldValue.arrayUnion(currentUserId),
         });
 
-        // dispatch()
+      dispatch(followUser({ targetUserId }));
     } catch (error) {
       console.error('Follow error:', error);
     }
@@ -110,7 +114,8 @@ export default function Home() {
   const handleUnfollow = async (targetUserId: string) => {
     try {
       const currentUserId = user?.uid;
-      if (!currentUserId) return;
+
+      if (!currentUserId || !targetUserId) return;
 
       const batch = firestore().batch();
 
@@ -124,6 +129,8 @@ export default function Home() {
       batch.update(targetUserRef, {
         followers: firestore.FieldValue.arrayRemove(currentUserId),
       });
+
+      dispatch(unfollowUser({ targetUserId }));
 
       await batch.commit();
     } catch (error) {
@@ -163,7 +170,8 @@ export default function Home() {
       }));
 
       console.log('Final data: ', finalData);
-      setPosts(finalData);
+      dispatch(setPosts(finalData));
+      // setPosts(finalData);
     } catch (error) {
       console.log('Error:', error);
     }

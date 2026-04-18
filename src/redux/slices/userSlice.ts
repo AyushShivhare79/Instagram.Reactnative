@@ -31,31 +31,20 @@ const userSlice = createSlice({
     clearUser(state) {
       state.items = null;
     },
-    followUser: (
-      state,
-      action: PayloadAction<{ currentUserId: string; targetUserId: string }>,
-    ) => {
-      const { currentUserId, targetUserId } = action.payload;
+    followUser: (state, action: PayloadAction<{ targetUserId: string }>) => {
+      const { targetUserId } = action.payload;
 
-      if (!state.user.following.includes(targetUserId)) {
-        state.user.following.push(targetUserId);
+      if (!state.items?.following.includes(targetUserId)) {
+        state.items?.following.push(targetUserId);
       }
     },
 
-    unfollowUser: (
-      state,
-      action: PayloadAction<{ currentUserId: string; targetUserId: string }>,
-    ) => {
-      const { currentUserId, targetUserId } = action.payload;
+    unfollowUser: (state, action: PayloadAction<{ targetUserId: string }>) => {
+      const { targetUserId } = action.payload;
 
-      state.user.following = state.user.following.filter(
-        id => id !== targetUserId,
-      );
-
-      const targetUser = state.users?.[targetUserId];
-      if (targetUser) {
-        targetUser.followers = targetUser.followers.filter(
-          id => id !== currentUserId,
+      if (state.items?.following.includes(targetUserId)) {
+        state.items.following = state.items?.following.filter(
+          id => id !== targetUserId,
         );
       }
     },
@@ -63,4 +52,5 @@ const userSlice = createSlice({
 });
 
 export default userSlice.reducer;
-export const { setUser, clearUser } = userSlice.actions;
+export const { setUser, clearUser, followUser, unfollowUser } =
+  userSlice.actions;

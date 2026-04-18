@@ -2,7 +2,7 @@ import FastImage from '@d11/react-native-fast-image';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { Alert, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './styles';
+import { styles } from './upload.styles';
 import { COLORS } from '@/theme/color/color';
 import CustomButton from '@/components/CustomButton';
 import { uploadToCloudinary } from '@/lib/cloudnary';
