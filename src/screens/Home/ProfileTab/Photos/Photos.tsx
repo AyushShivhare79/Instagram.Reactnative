@@ -1,14 +1,16 @@
-import { useAppSelector } from '../../../../hooks/redux';
-import { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { useEffect } from 'react';
 import { FlatList, View } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import FastImage from '@d11/react-native-fast-image';
-import { styles } from './styles';
+import { styles } from './photos.styles';
+import { setUserPosts } from '@/redux/slices/postsSlice';
 
 export default function Photos() {
-  const [posts, setPosts] = useState([{}]);
-
   const user = useAppSelector(state => state.user.items);
+  const posts = useAppSelector(state => state.posts.userPosts);
+
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -24,7 +26,7 @@ export default function Photos() {
           ...doc?._data,
         }));
 
-        setPosts(postsData);
+        dispatch(setUserPosts(postsData));
       } catch (error) {
         console.log(error);
       }

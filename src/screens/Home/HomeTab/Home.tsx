@@ -1,64 +1,19 @@
 import { Timestamp } from 'firebase/firestore';
-import {
-  FlatList,
-  PermissionsAndroid,
-  Platform,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Images } from '@/assets/images/index';
 import { Avatar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import { Icons } from '@/assets/Icons/index';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import firestore from '@react-native-firebase/firestore';
 import FastImage from '@d11/react-native-fast-image';
 import { styles } from './home.styles';
 import CustomButton from '@/components/CustomButton';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { RootStackParamList } from '@/navigation/StackNavigation';
 import { followUser, unfollowUser } from '@/redux/slices/userSlice';
 import { setPosts, toggleLike } from '@/redux/slices/postsSlice';
 import { textStyles } from '@/theme/typography/textStyles';
-
-const openLibrary = async () => {
-  try {
-    const granted = await requestPermission();
-
-    const options = {
-      mediaType: 'photo',
-      quality: 1,
-      selectionLimit: 1,
-    };
-
-    const result = await launchImageLibrary(options);
-
-    if (result.didCancel) return;
-
-    if (result.errorCode) {
-      console.log('Error:', result.errorMessage);
-      return;
-    }
-
-    if (result.assets?.length) {
-      const asset = result.assets[0];
-
-      const img = {
-        uri: asset.uri,
-        type: asset.type || 'image/jpeg',
-        name: asset.fileName || `photo_${Date.now()}.jpg`,
-      };
-
-      return img;
-    }
-  } catch (err) {
-    console.log('Picker Error:', err);
-  }
-};
+import HomeHeader from '@/components/HomeHeader/HomeHeader';
 
 type user = {
   uid: string;
@@ -77,9 +32,6 @@ export interface Posts {
 }
 
 export default function Home() {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
   const [status, setStatus] = useState(Array(10).fill({}));
 
   const user = useAppSelector(state => state.user.items);
@@ -204,31 +156,11 @@ export default function Home() {
     }
   };
 
-  const handleUpload = async () => {
-    const result = await openLibrary();
-    const uri = result?.uri;
-    if (!uri) return;
-    navigation.navigate('Upload', { url: uri });
-  };
-
   const ICON_SIZE = 28;
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerStyle}>
-        <TouchableOpacity onPress={handleUpload}>
-          <Icons.PlusIcon />
-        </TouchableOpacity>
-        <View style={styles.logoContainer}>
-          <FastImage
-            style={styles.image}
-            source={Images.instaLogo}
-            resizeMode={FastImage.resizeMode.cover}
-          />
-        </View>
-        <Icons.HeartIcon />
-      </View>
-
+      <HomeHeader />
       <View>
         <FlatList
           horizontal={true}
@@ -341,14 +273,3 @@ export default function Home() {
     </SafeAreaView>
   );
 }
-
-const requestPermission = async () => {
-  if (Platform.OS === 'android') {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-    );
-
-    return granted === PermissionsAndroid.RESULTS.GRANTED;
-  }
-  return true;
-};

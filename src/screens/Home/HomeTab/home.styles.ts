@@ -15,15 +15,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  logoContainer: {
-    width: 100,
-    backgroundColor: COLORS.paleGrey,
-    height: 28,
-    borderRadius: 16,
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  
   imageContainer: {
     width: '100%',
     backgroundColor: COLORS.paleGrey,

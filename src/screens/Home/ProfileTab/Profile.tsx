@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import CustomButton from '@/components/CustomButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './profile.styles';
@@ -8,10 +8,12 @@ import { Divider } from 'react-native-paper';
 import { useAppSelector } from '@/hooks/redux';
 import auth from '@react-native-firebase/auth';
 import { TopTabs } from '@/navigation/TopTabNavigation';
-import Toast from 'react-native-toast-message';
+import { textStyles } from '@/theme/typography/textStyles';
+import { Icons } from '@/assets/Icons';
 
 export default function Profile() {
   const user = useAppSelector(state => state.user.items);
+  const posts = useAppSelector(state => state.posts.userPosts);
 
   const handleLogout = async () => {
     try {
@@ -34,7 +36,7 @@ export default function Profile() {
         </View>
 
         <View>
-          <Text style={styles.countText}></Text>
+          <Text style={styles.countText}>{posts?.length}</Text>
           <Text style={styles.labelText}>Posts</Text>
         </View>
 
@@ -50,7 +52,7 @@ export default function Profile() {
       </View>
 
       <View>
-        <Text style={{ color: 'black', fontWeight: '700' }}>
+        <Text style={[{ color: 'black' }, textStyles.medium]}>
           {user?.firstName}
         </Text>
         <Text>No bio</Text>

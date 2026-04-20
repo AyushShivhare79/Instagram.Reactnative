@@ -3,10 +3,12 @@ import { createSlice } from '@reduxjs/toolkit';
 
 interface PostsState {
   items: Posts[] | null;
+  userPosts: Posts[] | null;
 }
 
 const initialState: PostsState = {
   items: null,
+  userPosts: null,
 };
 
 const postsSlice = createSlice({
@@ -15,6 +17,9 @@ const postsSlice = createSlice({
   reducers: {
     setPosts(state, action) {
       state.items = action.payload;
+    },
+    setUserPosts(state, action) {
+      state.userPosts = action.payload;
     },
     addPosts(state, action) {
       state.items?.unshift(action.payload);
@@ -37,4 +42,5 @@ const postsSlice = createSlice({
 });
 
 export default postsSlice.reducer;
-export const { setPosts, addPosts, toggleLike } = postsSlice.actions;
+export const { setPosts, setUserPosts, addPosts, toggleLike } =
+  postsSlice.actions;

@@ -1,35 +1,26 @@
+import { Posts } from '@/screens/Home/HomeTab/Home';
 import { createSlice } from '@reduxjs/toolkit';
-import { Timestamp } from 'firebase/firestore';
 
-export interface AppUser {
-  uid: string;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  profilePicture: string | null;
-  following: string[];
-  followers: string[];
-  createdAt: Timestamp | null;
+interface PostsState {
+  items: Posts[] | null;
 }
 
-interface UserState {
-  items: AppUser | null;
-}
-
-const initialState: UserState = {
+const initialState: PostsState = {
   items: null,
 };
 
-const userSlice = createSlice({
-  name: 'user',
+const postsSlice = createSlice({
+  name: 'posts',
   initialState,
   reducers: {
-    setUser(state, action) {
+    setPosts(state, action) {
       state.items = action.payload;
+    },
+    addPosts(state, action) {
+      state.items?.unshift(action.payload);
     },
   },
 });
 
-export default userSlice.reducer;
-export const { setUser } = userSlice.actions;
+export default postsSlice.reducer;
+export const { setPosts, addPosts, toggleLike } = postsSlice.actions;
