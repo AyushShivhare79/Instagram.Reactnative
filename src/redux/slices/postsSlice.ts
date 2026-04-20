@@ -16,8 +16,25 @@ const postsSlice = createSlice({
     setPosts(state, action) {
       state.items = action.payload;
     },
+    addPosts(state, action) {
+      state.items?.unshift(action.payload);
+    },
+    toggleLike(state, action) {
+      const { postId, userId } = action.payload;
+
+      const post = state.items?.find(p => p.id === postId);
+      if (!post) return;
+
+      const alreadyLiked = post.likes.includes(userId);
+
+      if (alreadyLiked) {
+        post.likes = post.likes.filter(id => id !== userId);
+      } else {
+        post.likes.push(userId);
+      }
+    },
   },
 });
 
 export default postsSlice.reducer;
-export const { setPosts } = postsSlice.actions;
+export const { setPosts, addPosts, toggleLike } = postsSlice.actions;

@@ -22,7 +22,8 @@ import CustomButton from '@/components/CustomButton';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { followUser, unfollowUser } from '@/redux/slices/userSlice';
-import { setPosts } from '@/redux/slices/postsSlice';
+import { setPosts, toggleLike } from '@/redux/slices/postsSlice';
+import { textStyles } from '@/theme/typography/textStyles';
 
 const openLibrary = async () => {
   try {
@@ -186,40 +187,18 @@ export default function Home() {
       const currentUserId = user?.uid;
       if (!currentUserId) return;
 
-      const isAlreadyLiked = postLikes.includes(currentUserId);
+      const isLiked = postLikes.includes(currentUserId);
       const postRef = firestore().collection('posts').doc(postId);
 
-      if (isAlreadyLiked) {
-        const response = await postRef.update({
-          likes: firestore.FieldValue.arrayRemove(currentUserId),
-        });
+      const updateAction = isLiked
+        ? firestore.FieldValue.arrayRemove(currentUserId)
+        : firestore.FieldValue.arrayUnion(currentUserId);
 
-        return setPosts(prev =>
-          prev.map(post => {
-            if (post.id !== postId) return post;
-
-            return {
-              ...post,
-              likes: post.likes.filter(id => id !== currentUserId),
-            };
-          }),
-        );
-      }
-
-      const response = await postRef.update({
-        likes: firestore.FieldValue.arrayUnion(currentUserId),
+      await postRef.update({
+        likes: updateAction,
       });
 
-      setPosts(prev =>
-        prev.map(post => {
-          if (post.id !== postId) return post;
-
-          return {
-            ...post,
-            likes: [...post.likes, currentUserId],
-          };
-        }),
-      );
+      dispatch(toggleLike({ postId, userId: currentUserId }));
     } catch (error) {
       console.error('Like error:', error);
     }
@@ -231,6 +210,8 @@ export default function Home() {
     if (!uri) return;
     navigation.navigate('Upload', { url: uri });
   };
+
+  const ICON_SIZE = 28;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -269,14 +250,16 @@ export default function Home() {
           renderItem={({ item }) => {
             const isMe = user?.uid === item.userId;
             const isFollow = user?.following?.includes(item?.user?.uid);
-            console.log('Yess: ', user?.following.includes(item?.user.uid));
+            const isLiked = item?.likes?.includes(user?.uid);
 
             return (
-              <View style={{ padding: 10 }}>
+              <View style={{ padding: 4 }}>
                 <View style={styles.postHeader}>
                   <View style={styles.postHeaderLeft}>
                     <Avatar.Image size={40} source={Images.status} />
-                    <Text>{item.user.username}</Text>
+                    <Text style={textStyles.semiBold}>
+                      {item.user.username}
+                    </Text>
                   </View>
 
                   <View
@@ -314,29 +297,42 @@ export default function Home() {
                   </View>
                 </View>
 
-                <View style={styles.bottomIcons}>
-                  <View style={styles.bottomLeftIcons}>
-                    <TouchableOpacity
-                      onPress={() => handleLike(item.id, item.likes)}
-                    >
-                      <Icons.HeartIcon
-                        size={28}
-                        fill={item?.likes?.includes(user?.uid) ? 'red' : 'null'}
-                      />
-                    </TouchableOpacity>
+                <View
+                  style={{
+                    paddingHorizontal: 3,
+                    marginTop: 10,
+                  }}
+                >
+                  <View style={styles.bottomIcons}>
+                    <View style={styles.bottomLeftIcons}>
+                      <TouchableOpacity
+                        onPress={() => handleLike(item.id, item.likes)}
+                      >
+                        <Icons.HeartIcon
+                          size={ICON_SIZE}
+                          fill={isLiked ? 'red' : 'none'}
+                          stroke={isLiked ? 'none' : 'black'}
+                        />
+                      </TouchableOpacity>
 
-                    <TouchableOpacity>
-                      <Icons.CommentIcon size={28} />
-                    </TouchableOpacity>
+                      <TouchableOpacity>
+                        <Icons.CommentIcon size={ICON_SIZE} />
+                      </TouchableOpacity>
 
-                    <TouchableOpacity>
-                      <Icons.SendIcon size={28} />
-                    </TouchableOpacity>
+                      <TouchableOpacity>
+                        <Icons.SendIcon size={ICON_SIZE} />
+                      </TouchableOpacity>
+                    </View>
+                    <Icons.BookmarkIcon />
                   </View>
-                  <Icons.BookmarkIcon />
-                </View>
 
-                <Text>{item.caption}</Text>
+                  <View style={{ flexDirection: 'row' }}>
+                    <Text style={textStyles.semiBold}>
+                      {item.user.username}{' '}
+                    </Text>
+                    <Text style={textStyles.sm}>{item.caption}</Text>
+                  </View>
+                </View>
               </View>
             );
           }}

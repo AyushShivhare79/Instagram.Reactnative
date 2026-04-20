@@ -1,8 +1,8 @@
-import { COLORS } from '../../../theme/color/color';
+import { COLORS } from '@/theme/color/color';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: { flexDirection: 'column', padding: 10 },
+  container: { flexDirection: 'column' },
   headerStyle: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -11,8 +11,8 @@ export const styles = StyleSheet.create({
   },
   imageOuterBox: {
     marginTop: 10,
-    width: '100%',
     justifyContent: 'center',
+    width: '100%',
     alignItems: 'center',
   },
   logoContainer: {
@@ -25,10 +25,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imageContainer: {
-    width: 350,
+    width: '100%',
     backgroundColor: COLORS.paleGrey,
     height: 350,
-    borderRadius: 16,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
@@ -36,10 +35,8 @@ export const styles = StyleSheet.create({
   image: { width: '100%', height: '100%' },
   flatListStatusContainer: { flexDirection: 'row', gap: 10 },
   bottomIcons: {
-    marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
   },
   bottomLeftIcons: {
     flexDirection: 'row',

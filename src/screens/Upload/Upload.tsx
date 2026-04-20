@@ -7,10 +7,11 @@ import { COLORS } from '@/theme/color/color';
 import CustomButton from '@/components/CustomButton';
 import { uploadToCloudinary } from '@/lib/cloudnary';
 import firestore from '@react-native-firebase/firestore';
-import { useAppSelector } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { RootStackParamList } from '@/navigation/StackNavigation';
+import { addPosts } from '@/redux/slices/postsSlice';
 
 type UploadProps = NativeStackScreenProps<RootStackParamList, 'Upload'>;
 
@@ -21,6 +22,7 @@ export default function Upload({ navigation }: UploadProps) {
   const uri = route.params?.url;
 
   const user = useAppSelector(state => state.user.items);
+  const dispatch = useAppDispatch();
 
   const handleUpload = async () => {
     if (caption.length <= 0) {
@@ -31,24 +33,29 @@ export default function Upload({ navigation }: UploadProps) {
       const response = await uploadToCloudinary(uri as string);
 
       if (!response) {
-        Alert.alert('Image upload sucessful!');
+        Alert.alert('Failed to upload!');
       }
 
-      const uploadResonse = await firestore().collection('posts').add({
+      const newPost = {
         userId: user?.uid,
         likes: [],
         image: response,
         caption: caption,
         createdAt: new Date(),
-      });
+        user: user,
+      };
 
-      console.log('Upload success: ', uploadResonse);
+      const uploadResonse = await firestore().collection('posts').add(newPost);
+
+      const updated = { id: uploadResonse.id, ...newPost };
+      console.log('Updated: ', updated);
+
+      dispatch(addPosts(updated));
       Alert.alert('Image uploaded!');
 
       return navigation.goBack();
     } catch (error) {
       console.error(error);
-
       return Alert.alert('Something went wrong!');
     }
   };
