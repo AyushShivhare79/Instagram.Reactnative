@@ -195,7 +195,14 @@ export default function Home() {
               <View style={{ padding: 4, paddingBottom: 17 }}>
                 <View style={styles.postHeader}>
                   <View style={styles.postHeaderLeft}>
-                    <Avatar.Image size={40} source={Images.status} />
+                    <Avatar.Image
+                      size={40}
+                      source={{
+                        uri: isMe
+                          ? user.profilePicture
+                          : item.user?.profilePicture,
+                      }}
+                    />
                     <Text style={textStyles.semiBold}>
                       {item.user.username}
                     </Text>

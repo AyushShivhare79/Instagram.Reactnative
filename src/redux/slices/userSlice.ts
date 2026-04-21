@@ -31,6 +31,13 @@ const userSlice = createSlice({
     clearUser(state) {
       state.items = null;
     },
+    updateProfilePicture: (state, action) => {
+      const { profilePicture } = action.payload;
+
+      if (state.items) {
+        state.items.profilePicture = profilePicture;
+      }
+    },
     followUser: (state, action: PayloadAction<{ targetUserId: string }>) => {
       const { targetUserId } = action.payload;
 
@@ -38,7 +45,6 @@ const userSlice = createSlice({
         state.items?.following.push(targetUserId);
       }
     },
-
     unfollowUser: (state, action: PayloadAction<{ targetUserId: string }>) => {
       const { targetUserId } = action.payload;
 
@@ -52,5 +58,5 @@ const userSlice = createSlice({
 });
 
 export default userSlice.reducer;
-export const { setUser, clearUser, followUser, unfollowUser } =
+export const { setUser, clearUser, followUser, unfollowUser, updateProfilePicture } =
   userSlice.actions;

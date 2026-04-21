@@ -6,7 +6,6 @@ import FastImage from '@d11/react-native-fast-image';
 import { Images } from '@/assets/images/index';
 import { Divider } from 'react-native-paper';
 import { useAppSelector } from '@/hooks/redux';
-import auth from '@react-native-firebase/auth';
 import { TopTabs } from '@/navigation/TopTabNavigation';
 import { textStyles } from '@/theme/typography/textStyles';
 import ProfileHeader from '@/components/ProfileHeader/ProfileHeader';
@@ -29,7 +28,11 @@ export default function Profile() {
         <View style={styles.imageContainer}>
           <FastImage
             style={[styles.image, styles.profilePicture]}
-            source={Images.status}
+            source={
+              user?.profilePicture
+                ? { uri: user.profilePicture }
+                : Images.defaultProfile
+            }
             resizeMode={FastImage.resizeMode.cover}
           />
         </View>

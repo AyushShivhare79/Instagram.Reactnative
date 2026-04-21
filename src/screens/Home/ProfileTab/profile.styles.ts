@@ -4,6 +4,7 @@ import { FONT_WEIGHT } from '@/theme/typography/fontWeights';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  container: { flex: 1, padding: 5 },
   topContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
