@@ -14,6 +14,7 @@ import { followUser, unfollowUser } from '@/redux/slices/userSlice';
 import { setPosts, toggleLike } from '@/redux/slices/postsSlice';
 import { textStyles } from '@/theme/typography/textStyles';
 import HomeHeader from '@/components/HomeHeader/HomeHeader';
+import { FONT_SIZE } from '@/theme/typography/fontSizes';
 
 type user = {
   uid: string;
@@ -31,8 +32,10 @@ export interface Posts {
   createdAt: Timestamp;
 }
 
+export const ICON_SIZE = FONT_SIZE['2xl'];
+
 export default function Home() {
-  const [status, setStatus] = useState(Array(10).fill({}));
+  const [status, setStatus] = useState();
 
   const user = useAppSelector(state => state.user.items);
   const posts = useAppSelector(state => state.posts.items);
@@ -156,12 +159,9 @@ export default function Home() {
     }
   };
 
-  const ICON_SIZE = 28;
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <HomeHeader />
-      <View>
+  const statusRender = () => {
+    return (
+      <View style={{ padding: 8 }}>
         <FlatList
           horizontal={true}
           showsHorizontalScrollIndicator={false}
@@ -173,19 +173,26 @@ export default function Home() {
           )}
         />
       </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <HomeHeader />
 
       <View>
         <FlatList
           contentContainerStyle={{ paddingVertical: 10 }}
           data={posts}
           keyExtractor={(_, index) => String(index)}
+          ListHeaderComponent={statusRender}
           renderItem={({ item }) => {
             const isMe = user?.uid === item.userId;
             const isFollow = user?.following?.includes(item?.user?.uid);
             const isLiked = item?.likes?.includes(user?.uid);
 
             return (
-              <View style={{ padding: 4 }}>
+              <View style={{ padding: 4, paddingBottom: 17 }}>
                 <View style={styles.postHeader}>
                   <View style={styles.postHeaderLeft}>
                     <Avatar.Image size={40} source={Images.status} />
@@ -258,7 +265,7 @@ export default function Home() {
                     <Icons.BookmarkIcon />
                   </View>
 
-                  <View style={{ flexDirection: 'row' }}>
+                  <View style={{ flexDirection: 'row', paddingTop: 6 }}>
                     <Text style={textStyles.semiBold}>
                       {item.user.username}{' '}
                     </Text>

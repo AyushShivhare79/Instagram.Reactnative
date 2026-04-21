@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, View } from 'react-native';
 import CustomButton from '@/components/CustomButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './profile.styles';
@@ -9,23 +9,22 @@ import { useAppSelector } from '@/hooks/redux';
 import auth from '@react-native-firebase/auth';
 import { TopTabs } from '@/navigation/TopTabNavigation';
 import { textStyles } from '@/theme/typography/textStyles';
-import { Icons } from '@/assets/Icons';
+import ProfileHeader from '@/components/ProfileHeader/ProfileHeader';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/navigation/StackNavigation';
 
 export default function Profile() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const user = useAppSelector(state => state.user.items);
   const posts = useAppSelector(state => state.posts.userPosts);
 
-  const handleLogout = async () => {
-    try {
-      await auth().signOut();
-      console.log('User signed out successfully');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
+      <ProfileHeader />
+
       <View style={styles.topContainer}>
         <View style={styles.imageContainer}>
           <FastImage
@@ -51,14 +50,18 @@ export default function Profile() {
         </View>
       </View>
 
-      <View>
-        <Text style={[{ color: 'black' }, textStyles.medium]}>
+      <View style={{ paddingHorizontal: 20, marginTop: 4, marginBottom: 5 }}>
+        <Text style={[{ color: 'black' }, textStyles.base, textStyles.medium]}>
           {user?.firstName}
         </Text>
-        <Text>No bio</Text>
+        <Text style={textStyles.sm}>No bio</Text>
       </View>
 
-      <CustomButton variant="outline" title="Edit Profile" />
+      <CustomButton
+        onPress={() => navigation.navigate('EditProfile')}
+        variant="outline"
+        title="Edit Profile"
+      />
       <Divider />
 
       <View style={styles.bottomSection}>

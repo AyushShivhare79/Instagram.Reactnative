@@ -2,16 +2,24 @@ import { COLORS } from '@/theme/color/color';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  headerStyle: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 10,
-    alignItems: 'center',
+  container: {
+    padding: 20,
   },
-  logoContainer: {
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 8,
+  },
+  error: {
+    color: 'red',
+  },
+  profilePicture: { borderRadius: 999 },
+  imageContainer: {
     width: 120,
     backgroundColor: COLORS.paleGrey,
-    height: 30,
+    height: 120,
     borderRadius: 16,
     overflow: 'hidden',
     justifyContent: 'center',

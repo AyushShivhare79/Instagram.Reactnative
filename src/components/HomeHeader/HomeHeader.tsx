@@ -12,8 +12,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { ICON_SIZE } from '@/screens/Home/HomeTab/Home';
 
-const openLibrary = async () => {
+export const openLibrary = async () => {
   try {
     const granted = await requestPermission();
 
@@ -58,10 +59,11 @@ export default function HomeHeader() {
     if (!uri) return;
     navigation.navigate('Upload', { url: uri });
   };
+
   return (
     <View style={styles.headerStyle}>
       <TouchableOpacity onPress={handleUpload}>
-        <Icons.PlusIcon />
+        <Icons.PlusIcon size={ICON_SIZE} />
       </TouchableOpacity>
       <View style={styles.logoContainer}>
         <FastImage
@@ -70,7 +72,7 @@ export default function HomeHeader() {
           resizeMode={FastImage.resizeMode.cover}
         />
       </View>
-      <Icons.HeartIcon />
+      <Icons.HeartIcon size={ICON_SIZE} />
     </View>
   );
 }
