@@ -22,7 +22,9 @@ const HomeIcon = ({ focused }: { focused: boolean }) => <Icons.HouseIcon />;
 const ReelsIcon = ({ focused }: { focused: boolean }) => <Icons.ReelsIcon />;
 const MessageIcon = ({ focused }: { focused: boolean }) => <Icons.SendIcon />;
 const SearchIcon = ({ focused }: { focused: boolean }) => <Icons.SearchIcon />;
-const ProfileIcon = () => <Avatar.Image size={24} source={Images.status} />;
+const ProfileIcon = () => (
+  <Avatar.Image size={24} source={Images.defaultProfile} />
+);
 
 export function BottomTabs() {
   return (

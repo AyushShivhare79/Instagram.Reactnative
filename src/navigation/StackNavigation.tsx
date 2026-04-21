@@ -9,15 +9,17 @@ import auth from '@react-native-firebase/auth';
 import Upload from '@/screens/Upload/Upload';
 import CustomHeader from '@/components/Appbar';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { AppUser, setUser } from '@/redux/slices/userSlice';
+import { setUser } from '@/redux/slices/userSlice';
 import { BottomTabs } from './BottomTabNavigation';
 import firestore from '@react-native-firebase/firestore';
+import EditProfile from '@/screens/EditProfile/EditProfile';
 
 export type RootStackParamList = {
   Home: undefined;
   Signup: undefined;
   Signin: undefined;
   Upload: { url: string };
+  EditProfile: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -61,6 +63,7 @@ const MainStack = () => {
         }}
         component={Upload}
       />
+      <Stack.Screen name="EditProfile" component={EditProfile} />
     </Stack.Navigator>
   );
 };

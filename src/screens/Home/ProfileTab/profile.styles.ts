@@ -1,4 +1,6 @@
-import { COLORS } from '../../../theme/color/color';
+import { FONT_SIZE } from '@/theme/typography/fontSizes';
+import { COLORS } from '@/theme/color/color';
+import { FONT_WEIGHT } from '@/theme/typography/fontWeights';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
@@ -20,6 +22,6 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bottomSection: { marginTop: 20, flex: 1 },
-  countText: { fontWeight: 'bold', fontSize: 16 },
-  labelText: { fontSize: 14 },
+  countText: { fontWeight: FONT_WEIGHT.bold, fontSize: FONT_SIZE.lg },
+  labelText: { fontSize: FONT_SIZE.base },
 });

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@d11/react-native-fast-image": "^8.13.0",
+    "@hookform/resolvers": "^5.2.2",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-firebase/app": "^23.8.8",
     "@react-native-firebase/auth": "^23.8.8",
@@ -28,7 +29,7 @@
     "imagekit-javascript": "^4.0.1",
     "lucide-react-native": "^1.7.0",
     "react": "19.2.3",
-    "react-hook-form": "^7.72.0",
+    "react-hook-form": "^7.73.1",
     "react-native": "0.84.1",
     "react-native-dotenv": "^3.4.11",
     "react-native-image-picker": "^8.2.1",
@@ -40,7 +41,8 @@
     "react-native-svg": "^15.15.4",
     "react-native-toast-message": "^2.3.3",
     "react-native-url-polyfill": "^3.0.0",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
