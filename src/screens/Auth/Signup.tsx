@@ -34,6 +34,8 @@ export default function Signup() {
       following: [],
       followers: [],
       bio: null,
+      website: null,
+      gender: null,
       uid: response.user.uid,
       createdAt: firestore.FieldValue.serverTimestamp(),
     });

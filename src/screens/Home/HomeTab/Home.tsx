@@ -1,4 +1,3 @@
-import { Timestamp } from 'firebase/firestore';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Images } from '@/assets/images/index';
 import { Avatar } from 'react-native-paper';
@@ -15,22 +14,6 @@ import { setPosts, toggleLike } from '@/redux/slices/postsSlice';
 import { textStyles } from '@/theme/typography/textStyles';
 import HomeHeader from '@/components/HomeHeader/HomeHeader';
 import { FONT_SIZE } from '@/theme/typography/fontSizes';
-
-type user = {
-  uid: string;
-  email: string;
-  name: string;
-  username: string;
-};
-export interface Posts {
-  id: string;
-  image: string;
-  user: user;
-  likes: string[];
-  caption: string;
-  userId: string;
-  createdAt: Timestamp;
-}
 
 export const ICON_SIZE = FONT_SIZE['2xl'];
 
@@ -197,11 +180,13 @@ export default function Home() {
                   <View style={styles.postHeaderLeft}>
                     <Avatar.Image
                       size={40}
-                      source={{
-                        uri: isMe
-                          ? user.profilePicture
-                          : item.user?.profilePicture,
-                      }}
+                      source={
+                        item?.user?.profilePicture
+                          ? { uri: item.user.profilePicture }
+                          : isMe && user?.profilePicture
+                          ? { uri: user.profilePicture }
+                          : Images.defaultProfile
+                      }
                     />
                     <Text style={textStyles.semiBold}>
                       {item.user.username}

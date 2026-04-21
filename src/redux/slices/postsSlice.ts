@@ -1,4 +1,4 @@
-import { Posts } from '@/screens/Home/HomeTab/Home';
+import { Posts } from '@/types/post';
 import { createSlice } from '@reduxjs/toolkit';
 
 interface PostsState {
