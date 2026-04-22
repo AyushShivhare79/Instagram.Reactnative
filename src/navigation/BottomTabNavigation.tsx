@@ -11,7 +11,6 @@ import { Avatar } from 'react-native-paper';
 export type BottomTabParamList = {
   Home: undefined;
   Reels: undefined;
-  Message: undefined;
   Search: undefined;
   Profile: undefined;
 };
@@ -51,13 +50,13 @@ export function BottomTabs() {
         name="Reels"
         component={SearchTab}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         options={{
           tabBarIcon: MessageIcon,
         }}
         name="Message"
         component={SearchTab}
-      />
+      /> */}
       <Tab.Screen
         options={{
           tabBarIcon: SearchIcon,

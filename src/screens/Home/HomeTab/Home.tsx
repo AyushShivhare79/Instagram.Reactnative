@@ -14,12 +14,17 @@ import { setPosts, toggleLike } from '@/redux/slices/postsSlice';
 import { textStyles } from '@/theme/typography/textStyles';
 import HomeHeader from '@/components/HomeHeader/HomeHeader';
 import { FONT_SIZE } from '@/theme/typography/fontSizes';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/navigation/StackNavigation';
 
 export const ICON_SIZE = FONT_SIZE['2xl'];
 
 export default function Home() {
-  const [status, setStatus] = useState();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
+  const [status, setStatus] = useState();
   const user = useAppSelector(state => state.user.items);
   const posts = useAppSelector(state => state.posts.items);
 
@@ -188,9 +193,15 @@ export default function Home() {
                           : Images.defaultProfile
                       }
                     />
-                    <Text style={textStyles.semiBold}>
-                      {item.user.username}
-                    </Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate('Message', { user2: item.user.uid })
+                      }
+                    >
+                      <Text style={textStyles.semiBold}>
+                        {item.user.username}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
 
                   <View
