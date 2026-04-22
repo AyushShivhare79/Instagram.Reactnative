@@ -13,6 +13,8 @@ import { setUser } from '@/redux/slices/userSlice';
 import { BottomTabs } from './BottomTabNavigation';
 import firestore from '@react-native-firebase/firestore';
 import EditProfile from '@/screens/EditProfile/EditProfile';
+import Profile from '@/screens/Profile/Profile';
+import Messages from '@/screens/Messages/Message/Message';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -20,6 +22,8 @@ export type RootStackParamList = {
   Signin: undefined;
   Upload: { url: string };
   EditProfile: undefined;
+  Profile: { id: string };
+  Message: { user2: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -63,7 +67,9 @@ const MainStack = () => {
         }}
         component={Upload}
       />
+      <Stack.Screen name="Message" component={Messages} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
+      <Stack.Screen name="Profile" component={Profile} />
     </Stack.Navigator>
   );
 };
