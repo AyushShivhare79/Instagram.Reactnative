@@ -2,15 +2,24 @@ import { Images } from '@/assets/images';
 import { useAppSelector } from '@/hooks/redux';
 import firestore from '@react-native-firebase/firestore';
 import { useEffect, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
 import { Avatar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ms } from '@/theme/responsive/responsive';
 import { Chat } from '@/types/messageList';
 import { styles } from './messageslist.styles';
 import { Icons } from '@/assets/Icons';
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/navigation/StackNavigation';
+import { useNavigation } from '@react-navigation/native';
 
 export default function MessagesList() {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
   const [chats, setChats] = useState<Chat[]>([]);
   const userId = useAppSelector(state => state.user.items?.uid);
 
@@ -64,7 +73,10 @@ export default function MessagesList() {
         data={chats}
         renderItem={({ item }) => (
           <View style={styles.messageContainer}>
-            <View
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('Message', { user2: item.otherUser?.uid! })
+              }
               style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
             >
               <Avatar.Image
@@ -81,7 +93,7 @@ export default function MessagesList() {
                 <Text style={styles.message}>{item.lastMessage}</Text>
               </View>
               <Text>• {formatTimeAgo(item.lastMessageAt)}</Text>
-            </View>
+            </TouchableOpacity>
 
             <Icons.CameraIcon />
           </View>
