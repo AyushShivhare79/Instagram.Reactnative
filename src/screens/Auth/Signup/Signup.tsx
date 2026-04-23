@@ -1,12 +1,19 @@
 import { Controller, useForm } from 'react-hook-form';
-import { z } from 'zod/v3';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   getAuth,
   createUserWithEmailAndPassword,
 } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import { TouchableOpacity, View } from 'react-native';
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './signup.styles';
@@ -16,43 +23,20 @@ import { Images } from '@/assets/images';
 import CustomButton from '@/components/CustomButton';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
+import { SignupSchema, signupSchema } from '@/schema/SignupSchema';
 
 type SignupProps = NativeStackScreenProps<RootStackParamList, 'Signup'>;
 
 export default function Signup({ navigation }: SignupProps) {
-  const authSchema = z.object({
-    name: z
-      .string()
-      .min(2, { message: 'Name must be at least 2 characters long' })
-      .max(50, { message: 'Name is too long' }),
-
-    username: z
-      .string()
-      .min(3, { message: 'Username must be at least 3 characters' })
-      .max(20, { message: 'Username must be under 20 characters' })
-      .regex(/^[a-zA-Z0-9_]+$/, {
-        message: 'Username can only contain letters, numbers, and underscores',
-      }),
-
-    email: z.string().email({ message: 'Invalid email address' }),
-
-    password: z
-      .string()
-      .min(6, { message: 'Password must be at least 6 characters long' })
-      .max(100),
-  });
-
-  type AuthFormData = z.infer<typeof authSchema>;
-
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(authSchema),
+    resolver: zodResolver(signupSchema),
   });
 
-  const onSubmit = async (data: AuthFormData) => {
+  const onSubmit = async (data: SignupSchema) => {
     const { username, name, email, password } = data;
 
     const response = await createUserWithEmailAndPassword(
@@ -77,7 +61,7 @@ export default function Signup({ navigation }: SignupProps) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, justifyContent: 'center' }}>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={{ gap: 30, padding: 10 }}>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <View style={styles.imageContainer}>
@@ -100,7 +84,6 @@ export default function Signup({ navigation }: SignupProps) {
                 theme={{
                   roundness: 30,
                 }}
-                secureTextEntry={true}
                 autoCapitalize="none"
                 value={value}
                 onChangeText={onChange}
@@ -124,7 +107,6 @@ export default function Signup({ navigation }: SignupProps) {
                 theme={{
                   roundness: 30,
                 }}
-                secureTextEntry={true}
                 autoCapitalize="none"
                 value={value}
                 onChangeText={onChange}
@@ -148,7 +130,6 @@ export default function Signup({ navigation }: SignupProps) {
                 theme={{
                   roundness: 30,
                 }}
-                secureTextEntry={true}
                 autoCapitalize="none"
                 value={value}
                 onChangeText={onChange}
@@ -158,8 +139,8 @@ export default function Signup({ navigation }: SignupProps) {
               />
             )}
           />
-          {errors.name && (
-            <Text style={styles.error}>{errors.name.message}</Text>
+          {errors.email && (
+            <Text style={styles.error}>{errors.email.message}</Text>
           )}
 
           <Controller
@@ -182,8 +163,8 @@ export default function Signup({ navigation }: SignupProps) {
               />
             )}
           />
-          {errors.name && (
-            <Text style={styles.error}>{errors.name.message}</Text>
+          {errors.password && (
+            <Text style={styles.error}>{errors.password.message}</Text>
           )}
 
           <Controller
@@ -235,11 +216,22 @@ export default function Signup({ navigation }: SignupProps) {
           </View>
         </View>
       </View>
-      <CustomButton
-        onPress={() => navigation.navigate('Signup')}
-        variant="outline"
-        title="Create new account"
-      />
+
+      <View
+        style={{
+          padding: 7,
+          position: 'absolute',
+          bottom: 50,
+          left: 50,
+          right: 50,
+        }}
+      >
+        <CustomButton
+          onPress={() => navigation.navigate('Signin')}
+          variant="outline"
+          title="Create new account"
+        />
+      </View>
     </SafeAreaView>
   );
 }

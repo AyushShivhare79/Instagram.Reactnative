@@ -42,7 +42,7 @@ export function MyStack() {
         .doc(item?.uid)
         .get();
 
-      dispatch(setUser(userData?._data));
+      dispatch(setUser({ ...userData?.data(), uid: item?.uid }));
       if (initializing) setInitializing(false);
     });
   }, [dispatch, initializing]);

@@ -4,8 +4,7 @@ export interface AppUser {
   uid: string;
   username: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   profilePicture: string | null;
   following: string[];
   followers: string[];
