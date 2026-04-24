@@ -1,12 +1,12 @@
 import { Text, View } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import CustomButton from '@/components/CustomButton';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './profile.styles';
+import { styles } from './viewprofile.styles';
 import FastImage from '@d11/react-native-fast-image';
 import { Images } from '@/assets/images/index';
 import { Divider } from 'react-native-paper';
-import { useAppSelector } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { TopTabs } from '@/navigation/TopTabNavigation';
 import { textStyles } from '@/theme/typography/textStyles';
 import ProfileHeader from '@/components/ProfileHeader/ProfileHeader';
@@ -14,18 +14,19 @@ import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import firestore from '@react-native-firebase/firestore';
+import { setViewUserProfile } from '@/redux/slices/userPostsSlice';
 
-export default function Profile() {
-  const route = useRoute<RouteProp<RootStackParamList, 'Profile'>>();
-  const id = route.params?.id;
-
+export default function ViewProfile() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
-  const reduxUser = useAppSelector(state => state.user.items);
-  const posts = useAppSelector(state => state.posts.userPosts);
+  const route = useRoute<RouteProp<RootStackParamList, 'ViewProfile'>>();
+  const id = route.params?.id;
 
-  const [user, setUser] = useState<any>(null);
+  const dispatch = useAppDispatch();
+
+  const user = useAppSelector(state => state.viewProfile.items);
+  const posts = useAppSelector(state => state.posts.userPosts);
 
   useEffect(() => {
     if (!id) return;
@@ -34,17 +35,12 @@ export default function Profile() {
       const docSnap = await firestore().collection('users').doc(id).get();
 
       if (docSnap.exists) {
-        setUser(docSnap.data());
+        dispatch(setViewUserProfile(docSnap.data()));
       }
     };
 
     fetchUser();
-  }, [id]);
-
-  // fallback → if it's your own profile
-  const displayUser = id ? user : reduxUser;
-
-  if (!displayUser) return null;
+  }, [dispatch, id]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -55,8 +51,8 @@ export default function Profile() {
           <FastImage
             style={[styles.image, styles.profilePicture]}
             source={
-              displayUser?.profilePicture
-                ? { uri: displayUser.profilePicture }
+              user?.profilePicture
+                ? { uri: user.profilePicture }
                 : Images.defaultProfile
             }
             resizeMode={FastImage.resizeMode.cover}
@@ -69,25 +65,21 @@ export default function Profile() {
         </View>
 
         <View>
-          <Text style={styles.countText}>
-            {displayUser?.followers?.length || 0}
-          </Text>
+          <Text style={styles.countText}>{user?.followers?.length || 0}</Text>
           <Text style={styles.labelText}>Followers</Text>
         </View>
 
         <View>
-          <Text style={styles.countText}>
-            {displayUser?.following?.length || 0}
-          </Text>
+          <Text style={styles.countText}>{user?.following?.length || 0}</Text>
           <Text style={styles.labelText}>Following</Text>
         </View>
       </View>
 
       <View style={{ paddingHorizontal: 20, marginTop: 4, marginBottom: 5 }}>
         <Text style={[{ color: 'black' }, textStyles.base, textStyles.medium]}>
-          {displayUser?.firstName}
+          {user?.name}
         </Text>
-        <Text style={textStyles.sm}>{displayUser?.bio || 'No bio'}</Text>
+        <Text style={textStyles.sm}>{user?.bio || 'No bio'}</Text>
       </View>
 
       {!id && (
@@ -101,7 +93,7 @@ export default function Profile() {
       <Divider />
 
       <View style={styles.bottomSection}>
-        <TopTabs userId={id} />
+        <TopTabs />
       </View>
     </SafeAreaView>
   );

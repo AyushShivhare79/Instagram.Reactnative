@@ -9,10 +9,7 @@ import { ms } from '@/theme/responsive/responsive';
 import { Chat } from '@/types/messageList';
 import { styles } from './messageslist.styles';
 import { Icons } from '@/assets/Icons';
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { useNavigation } from '@react-navigation/native';
 
@@ -65,6 +62,8 @@ export default function MessagesList() {
     return () => unsubscribe();
   }, [userId]);
 
+  if (chats.length < 1) return;
+
   return (
     <SafeAreaView style={styles.container}>
       <Text>Messages</Text>
@@ -107,7 +106,7 @@ const formatTimeAgo = timestamp => {
   if (!timestamp) return '';
 
   const now = new Date();
-  const time = timestamp.toDate(); // 🔥 important
+  const time = timestamp.toDate();
   const diffInSeconds = Math.floor((now - time) / 1000);
 
   if (diffInSeconds < 60) return `${diffInSeconds}s`;

@@ -7,7 +7,7 @@ import { styles } from './photos.styles';
 import { setUserPosts } from '@/redux/slices/postsSlice';
 
 export default function Photos() {
-  const user = useAppSelector(state => state.user.items);
+  const userId = useAppSelector(state => state.viewProfile.items?.uid);
   const posts = useAppSelector(state => state.posts.userPosts);
 
   const dispatch = useAppDispatch();
@@ -17,7 +17,7 @@ export default function Photos() {
       try {
         const snapshot = await firestore()
           .collection('posts')
-          .where('userId', '==', user?.uid)
+          .where('userId', '==', userId)
           .orderBy('createdAt', 'desc')
           .get();
 
@@ -33,7 +33,7 @@ export default function Photos() {
     };
 
     fetchPost();
-  }, []);
+  }, [userId, dispatch]);
 
   return (
     <View style={styles.container}>

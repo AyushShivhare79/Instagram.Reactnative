@@ -17,6 +17,7 @@ import { FONT_SIZE } from '@/theme/typography/fontSizes';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
+import { vs } from '@/theme/responsive/responsive';
 
 export const ICON_SIZE = FONT_SIZE['2xl'];
 
@@ -170,7 +171,7 @@ export default function Home() {
 
       <View>
         <FlatList
-          contentContainerStyle={{ paddingVertical: 10 }}
+          contentContainerStyle={{ paddingBottom: vs(80) }}
           data={posts}
           keyExtractor={(_, index) => String(index)}
           ListHeaderComponent={statusRender}
@@ -195,7 +196,9 @@ export default function Home() {
                     />
                     <TouchableOpacity
                       onPress={() =>
-                        navigation.navigate('Message', { user2: item.user.uid })
+                        navigation.navigate('ViewProfile', {
+                          id: item.user.uid,
+                        })
                       }
                     >
                       <Text style={textStyles.semiBold}>
