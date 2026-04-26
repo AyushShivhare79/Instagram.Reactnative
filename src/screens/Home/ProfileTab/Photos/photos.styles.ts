@@ -1,13 +1,14 @@
 import { COLORS } from '@/theme/color/color';
+import { hs, ms, vs } from '@/theme/responsive/responsive';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: { padding: 5 },
   imageContainer: {
-    marginTop: 10,
-    width: 124,
+    marginTop: vs(10),
+    width: hs(124),
     backgroundColor: COLORS.paleGrey,
-    height: 124,
+    height: ms(124),
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',

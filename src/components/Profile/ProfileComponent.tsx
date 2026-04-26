@@ -8,6 +8,7 @@ import FastImage from '@d11/react-native-fast-image';
 import { textStyles } from '@/theme/typography/textStyles';
 import { styles } from './profilecomponent.styles';
 import { Images } from '@/assets/images';
+import { useAppSelector } from '@/hooks/redux';
 
 interface ProfileComponentProps {
   user: AppUser;
@@ -20,6 +21,9 @@ export default function ProfileComponent({
   posts,
   navigation,
 }: ProfileComponentProps) {
+  const me = useAppSelector(state => state.user.items);
+  const isMe = user?.uid === me?.uid;
+
   return (
     <>
       <View style={styles.topContainer}>
@@ -58,11 +62,13 @@ export default function ProfileComponent({
         <Text style={textStyles.sm}>{user?.bio || 'No bio'}</Text>
       </View>
 
-      <CustomButton
-        onPress={() => navigation.navigate('EditProfile')}
-        variant="outline"
-        title="Edit Profile"
-      />
+      {isMe && (
+        <CustomButton
+          onPress={() => navigation.navigate('EditProfile')}
+          variant="outline"
+          title="Edit Profile"
+        />
+      )}
     </>
   );
 }

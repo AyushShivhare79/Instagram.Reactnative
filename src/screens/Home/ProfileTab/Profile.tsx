@@ -7,12 +7,14 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import ProfileHeader from '@/components/ProfileHeader/ProfileHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProfileComponent from '@/components/Profile/ProfileComponent';
 
 export default function Profile() {
+  const [loading, setLoading] = useState(true);
+
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -24,6 +26,7 @@ export default function Profile() {
   useFocusEffect(
     useCallback(() => {
       dispatch(setViewUserProfile(user));
+      setLoading(false);
 
       return () => {
         dispatch(setViewUserProfile(null));

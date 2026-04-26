@@ -5,15 +5,7 @@ import {
   createUserWithEmailAndPassword,
 } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './signup.styles';
@@ -58,6 +50,22 @@ export default function Signup({ navigation }: SignupProps) {
       uid: response.user.uid,
       createdAt: firestore.FieldValue.serverTimestamp(),
     });
+  };
+
+
+  const saveTokenToFirestore = async (token: string) => {
+    const userId = user?.uid;
+    if (!userId) return;
+
+    await firestore()
+      .collection('users')
+      .doc(userId)
+      .set(
+        {
+          fcmTokens: firestore.FieldValue.arrayUnion(token),
+        },
+        { merge: true },
+      );
   };
 
   return (

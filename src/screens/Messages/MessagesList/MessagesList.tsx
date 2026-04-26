@@ -3,7 +3,7 @@ import { useAppSelector } from '@/hooks/redux';
 import firestore from '@react-native-firebase/firestore';
 import { useEffect, useState } from 'react';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native';
-import { Avatar } from 'react-native-paper';
+import { Avatar, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ms } from '@/theme/responsive/responsive';
 import { Chat } from '@/types/messageList';
@@ -12,13 +12,23 @@ import { Icons } from '@/assets/Icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { useNavigation } from '@react-navigation/native';
+import Loading from '@/components/Loading/loading';
 
 export default function MessagesList() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [chats, setChats] = useState<Chat[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
   const userId = useAppSelector(state => state.user.items?.uid);
+
+  const searchedChats = chats.filter(
+    chat =>
+      chat.otherUser?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      chat.lastMessage?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   useEffect(() => {
     if (!userId) return;
@@ -53,6 +63,7 @@ export default function MessagesList() {
           );
 
           setChats(response);
+          setLoading(false);
         },
         error => {
           console.error('Chats listener error:', error);
@@ -62,42 +73,67 @@ export default function MessagesList() {
     return () => unsubscribe();
   }, [userId]);
 
-  if (chats.length < 1) return;
+  if (loading) return <Loading />;
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Messages</Text>
-      <FlatList
-        contentContainerStyle={{ gap: 10 }}
-        data={chats}
-        renderItem={({ item }) => (
-          <View style={styles.messageContainer}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('Message', { user2: item.otherUser?.uid! })
-              }
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
-            >
-              <Avatar.Image
-                size={ms(70)}
-                source={
-                  item.otherUser?.profilePicture
-                    ? { uri: item.otherUser?.profilePicture }
-                    : Images.defaultProfile
-                }
-              />
-
-              <View>
-                <Text style={styles.userName}>{item.otherUser?.name}</Text>
-                <Text style={styles.message}>{item.lastMessage}</Text>
-              </View>
-              <Text>• {formatTimeAgo(item.lastMessageAt)}</Text>
-            </TouchableOpacity>
-
-            <Icons.CameraIcon />
-          </View>
-        )}
+      <TextInput
+        mode="flat"
+        theme={{
+          roundness: 30,
+        }}
+        autoCapitalize="none"
+        placeholder="Search"
+        onChangeText={setSearch}
+        left={<TextInput.Icon icon={() => <Icons.SearchIcon />} />}
+        style={styles.input}
+        contentStyle={styles.content}
+        underlineColor="transparent"
+        activeUnderlineColor="transparent"
       />
+      <Text style={styles.messageText}>Messages</Text>
+
+      {chats.length < 1 ? (
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Text>No message</Text>
+        </View>
+      ) : (
+        <FlatList
+          contentContainerStyle={{ gap: 10 }}
+          data={searchedChats}
+          renderItem={({ item }) => (
+            <View style={styles.messageContainer}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('Message', {
+                    user2: item.otherUser?.uid!,
+                  })
+                }
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
+              >
+                <Avatar.Image
+                  size={ms(70)}
+                  source={
+                    item.otherUser?.profilePicture
+                      ? { uri: item.otherUser?.profilePicture }
+                      : Images.defaultProfile
+                  }
+                />
+
+                <View>
+                  <Text style={styles.userName}>{item.otherUser?.name}</Text>
+                  <Text style={styles.message}>{item.lastMessage}</Text>
+                </View>
+                <Text>• {formatTimeAgo(item.lastMessageAt)}</Text>
+              </TouchableOpacity>
+
+              <Icons.CameraIcon />
+            </View>
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 }

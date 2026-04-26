@@ -18,6 +18,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { vs } from '@/theme/responsive/responsive';
+import messaging from '@react-native-firebase/messaging';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 export const ICON_SIZE = FONT_SIZE['2xl'];
 
@@ -104,7 +106,7 @@ export default function Home() {
       const userMap = {};
 
       userDocs.forEach(doc => {
-        if (doc.exists) {
+        if (doc.exists()) {
           userMap[doc.id] = doc.data();
         }
       });
@@ -122,8 +124,32 @@ export default function Home() {
     }
   };
 
+  const initFCM = async () => {
+    const hasPermission = await requestNotificationPermission();
+    if (!hasPermission) return;
+
+    const authStatus = await messaging().requestPermission();
+    console.log('Auth status:', authStatus);
+
+    const token = await messaging().getToken();
+    console.log('FCM Token:', token);
+  };
+
   useEffect(() => {
     getPosts();
+
+    initFCM();
+
+    // const getToken = async () => {
+    //   const granted = await requestNotificationPermission();
+
+    //   console.log('Trying to get token');
+    //   await messaging().requestPermission();
+    //   const token = await messaging().getToken();
+    //   console.log('FCM Token:', token);
+    // };
+
+    // getToken();
   }, []);
 
   const handleLike = async (postId: string, postLikes: string[]) => {
@@ -286,3 +312,19 @@ export default function Home() {
     </SafeAreaView>
   );
 }
+
+const requestNotificationPermission = async () => {
+  if (Platform.OS === 'android' && Platform.Version >= 33) {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+
+    console.log('Notification permission:', granted);
+
+    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+      console.log('❌ Notification permission denied');
+      return false;
+    }
+  }
+  return true;
+};

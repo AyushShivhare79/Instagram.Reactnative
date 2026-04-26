@@ -1,12 +1,15 @@
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import FastImage from '@d11/react-native-fast-image';
 import { styles } from './photos.styles';
 import { setUserPosts } from '@/redux/slices/postsSlice';
+import Loading from '@/components/Loading/loading';
 
 export default function Photos() {
+  const [loading, setLoading] = useState(true);
+
   const userId = useAppSelector(state => state.viewProfile.items?.uid);
   const posts = useAppSelector(state => state.posts.userPosts);
 
@@ -21,12 +24,15 @@ export default function Photos() {
           .orderBy('createdAt', 'desc')
           .get();
 
+        if (!snapshot.docs) return;
+
         const postsData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc?._data,
         }));
 
         dispatch(setUserPosts(postsData));
+        setLoading(false);
       } catch (error) {
         console.log(error);
       }
@@ -35,6 +41,9 @@ export default function Photos() {
     fetchPost();
   }, [userId, dispatch]);
 
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <View style={styles.container}>
       <FlatList
