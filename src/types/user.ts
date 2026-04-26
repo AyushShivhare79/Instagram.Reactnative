@@ -1,13 +1,16 @@
 import { Timestamp } from 'firebase/firestore';
-
 export interface AppUser {
   uid: string;
   username: string;
   email: string;
-  firstName: string;
-  lastName: string;
-  profilePicture: string | null;
+  name: string;
+  profilePicture?: string | null;
+  bio?: string | null;
+  website?: string | null;
+  gender?: string | null;
+
   following: string[];
   followers: string[];
-  createdAt: Timestamp | null;
+
+  createdAt?: Timestamp | null;
 }

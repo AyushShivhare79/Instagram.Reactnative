@@ -12,6 +12,7 @@ import {
   Send,
   SquareUser,
   TvMinimalPlay,
+  Camera,
 } from 'lucide-react-native';
 
 export const Icons = {
@@ -28,4 +29,5 @@ export const Icons = {
   GridIcon: Grid3x2,
   UserIcon: SquareUser,
   MenuIcon: Menu,
+  CameraIcon: Camera,
 };

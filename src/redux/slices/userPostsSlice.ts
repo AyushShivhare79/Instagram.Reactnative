@@ -1,26 +1,23 @@
-import { Posts } from '@/screens/Home/HomeTab/Home';
+import { AppUser } from '@/types/user';
 import { createSlice } from '@reduxjs/toolkit';
 
-interface PostsState {
-  items: Posts[] | null;
+interface UserState {
+  items: AppUser | null;
 }
 
-const initialState: PostsState = {
+const initialState: UserState = {
   items: null,
 };
 
-const postsSlice = createSlice({
-  name: 'posts',
+const userSlice = createSlice({
+  name: 'user',
   initialState,
   reducers: {
-    setPosts(state, action) {
+    setViewUserProfile(state, action) {
       state.items = action.payload;
-    },
-    addPosts(state, action) {
-      state.items?.unshift(action.payload);
     },
   },
 });
 
-export default postsSlice.reducer;
-export const { setPosts, addPosts, toggleLike } = postsSlice.actions;
+export default userSlice.reducer;
+export const { setViewUserProfile } = userSlice.actions;

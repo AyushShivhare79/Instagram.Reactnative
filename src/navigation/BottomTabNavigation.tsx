@@ -7,10 +7,12 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Images } from '@/assets/images/index';
 import { Icons } from '@/assets/Icons';
 import { Avatar } from 'react-native-paper';
+import MessagesList from '@/screens/Messages/MessagesList/MessagesList';
 
 export type BottomTabParamList = {
   Home: undefined;
   Reels: undefined;
+  MessageList: undefined;
   Search: undefined;
   Profile: undefined;
 };
@@ -50,13 +52,13 @@ export function BottomTabs() {
         name="Reels"
         component={SearchTab}
       />
-      {/* <Tab.Screen
+      <Tab.Screen
         options={{
           tabBarIcon: MessageIcon,
         }}
-        name="Message"
-        component={SearchTab}
-      /> */}
+        name="MessageList"
+        component={MessagesList}
+      />
       <Tab.Screen
         options={{
           tabBarIcon: SearchIcon,

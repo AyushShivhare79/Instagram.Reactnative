@@ -2,8 +2,8 @@ import 'react-native-url-polyfill/auto';
 import { NavigationContainer } from '@react-navigation/native';
 import 'react-native-url-polyfill/auto';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Signup from '@/screens/Auth/Signup';
-import Signin from '@/screens/Auth/Signin';
+import Signup from '@/screens/Auth/Signup/Signup';
+import Signin from '@/screens/Auth/Signin/Signin';
 import { useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import Upload from '@/screens/Upload/Upload';
@@ -13,8 +13,9 @@ import { setUser } from '@/redux/slices/userSlice';
 import { BottomTabs } from './BottomTabNavigation';
 import firestore from '@react-native-firebase/firestore';
 import EditProfile from '@/screens/EditProfile/EditProfile';
-import Profile from '@/screens/Profile/Profile';
+import Profile from '@/screens/ViewProfile/ViewProfile';
 import Messages from '@/screens/Messages/Message/Message';
+import AppHeader from '@/components/AppHeader/AppHeader';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -22,7 +23,7 @@ export type RootStackParamList = {
   Signin: undefined;
   Upload: { url: string };
   EditProfile: undefined;
-  Profile: { id: string };
+  ViewProfile: { id: string };
   Message: { user2: string };
 };
 
@@ -41,7 +42,7 @@ export function MyStack() {
         .doc(item?.uid)
         .get();
 
-      dispatch(setUser(userData?._data));
+      dispatch(setUser({ ...userData?.data(), uid: item?.uid }));
       if (initializing) setInitializing(false);
     });
   }, [dispatch, initializing]);
@@ -55,6 +56,8 @@ export function MyStack() {
   );
 }
 
+const UploadHeader = () => <CustomHeader title="New Post" />;
+
 const MainStack = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -63,22 +66,33 @@ const MainStack = () => {
         name="Upload"
         options={{
           headerShown: true,
-          header: () => <CustomHeader title="New Post" />,
+          header: UploadHeader,
         }}
         component={Upload}
       />
       <Stack.Screen name="Message" component={Messages} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
-      <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="ViewProfile" component={Profile} />
     </Stack.Navigator>
   );
 };
 
+const SignupHeader = () => <AppHeader title="Signup" />;
+const LoginHeader = () => <AppHeader showBack={false} title="Login" />;
+
 const AuthStack = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Signup" component={Signup} />
-      <Stack.Screen name="Signin" component={Signin} />
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Signup"
+        component={Signup}
+        options={{ header: SignupHeader }}
+      />
+      <Stack.Screen
+        name="Signin"
+        component={Signin}
+        options={{ header: LoginHeader }}
+      />
     </Stack.Navigator>
   );
 };

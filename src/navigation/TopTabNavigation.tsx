@@ -1,6 +1,4 @@
 import { Icons } from '@/assets/Icons';
-import 'react-native-url-polyfill/auto';
-import 'react-native-url-polyfill/auto';
 import Tagged from '@/screens/Home/ProfileTab/Tagged/Tagged';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import Photos from '@/screens/Home/ProfileTab/Photos/Photos';
@@ -24,17 +22,14 @@ export function TopTabs() {
       }}
     >
       <TopTab.Screen
-        options={{
-          tabBarIcon: PhotosIcon,
-        }}
         name="Photos"
+        options={{ tabBarIcon: PhotosIcon }}
         component={Photos}
       />
+
       <TopTab.Screen
-        options={{
-          tabBarIcon: TaggedIcon,
-        }}
         name="Tags"
+        options={{ tabBarIcon: TaggedIcon }}
         component={Tagged}
       />
     </TopTab.Navigator>
