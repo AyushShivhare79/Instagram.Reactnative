@@ -13,6 +13,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { useNavigation } from '@react-navigation/native';
 import Loading from '@/components/Loading/loading';
+import { FONT_WEIGHT } from '@/theme/typography/fontWeights';
 
 export default function MessagesList() {
   const navigation =
@@ -103,35 +104,57 @@ export default function MessagesList() {
         <FlatList
           contentContainerStyle={{ gap: 10 }}
           data={searchedChats}
-          renderItem={({ item }) => (
-            <View style={styles.messageContainer}>
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate('Message', {
-                    user2: item.otherUser?.uid!,
-                  })
-                }
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}
-              >
-                <Avatar.Image
-                  size={ms(70)}
-                  source={
-                    item.otherUser?.profilePicture
-                      ? { uri: item.otherUser?.profilePicture }
-                      : Images.defaultProfile
+          renderItem={({ item }) => {
+            console.log('My user id: ', userId);
+            const unread = item.unreadCounts?.[userId];
+            return (
+              <View style={styles.messageContainer}>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('Message', {
+                      user2: item.otherUser?.uid!,
+                    })
                   }
-                />
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 10,
+                  }}
+                >
+                  <Avatar.Image
+                    size={ms(70)}
+                    source={
+                      item.otherUser?.profilePicture
+                        ? { uri: item.otherUser?.profilePicture }
+                        : Images.defaultProfile
+                    }
+                  />
 
-                <View>
-                  <Text style={styles.userName}>{item.otherUser?.name}</Text>
-                  <Text style={styles.message}>{item.lastMessage}</Text>
-                </View>
-                <Text>• {formatTimeAgo(item.lastMessageAt)}</Text>
-              </TouchableOpacity>
+                  <View>
+                    <Text style={styles.userName}>{item.otherUser?.name}</Text>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {unread > 1 ? (
+                        <Text style={{ fontWeight: FONT_WEIGHT.bold }}>
+                          {unread}+ new messages
+                        </Text>
+                      ) : (
+                        <Text style={styles.message}>{item.lastMessage}</Text>
+                      )}
+                      <Text> • {formatTimeAgo(item.lastMessageAt)}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
 
-              <Icons.CameraIcon />
-            </View>
-          )}
+                <Icons.CameraIcon />
+              </View>
+            );
+          }}
         />
       )}
     </SafeAreaView>

@@ -9,10 +9,18 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import firestore from '@react-native-firebase/firestore';
+import firestore, {
+  collection,
+  doc,
+  increment,
+  serverTimestamp,
+  updateDoc,
+  writeBatch,
+} from '@react-native-firebase/firestore';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { useAppSelector } from '@/hooks/redux';
+import { db } from '@/lib/firebase';
 
 export default function Messages() {
   const route = useRoute<RouteProp<RootStackParamList, 'Message'>>();
@@ -29,7 +37,15 @@ export default function Messages() {
     if (!user2) return;
     const id = user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
     setChatId(id);
-  }, [user1, user2]);
+
+    const readMessage = async () => {
+      await updateDoc(doc(db, 'chats', chatId!), {
+        [`unreadCounts.${user1}`]: 0,
+      });
+    };
+
+    readMessage();
+  }, [user1, user2, chatId]);
 
   useEffect(() => {
     if (!chatId) return;
@@ -53,6 +69,7 @@ export default function Messages() {
           id: doc.id,
           ...doc.data(),
         }));
+
         setMessages(msgs);
       });
 
@@ -62,24 +79,34 @@ export default function Messages() {
   const sendMessage = async () => {
     if (!text.trim() || !chatId) return;
 
-    const chatRef = firestore().collection('chats').doc(chatId);
+    const chatRef = doc(db, 'chats', chatId);
+    const messagesRef = collection(chatRef, 'messages');
 
-    const messageData = {
+    const batch = writeBatch(db);
+
+    const newMessageRef = doc(messagesRef);
+
+    batch.set(newMessageRef, {
       text,
       senderId: user1,
-      createdAt: firestore.FieldValue.serverTimestamp(),
-    };
+      createdAt: serverTimestamp(),
+    });
 
-    await chatRef.collection('messages').add(messageData);
-
-    await chatRef.set(
+    batch.set(
+      chatRef,
       {
         lastMessage: text,
-        lastMessageAt: firestore.FieldValue.serverTimestamp(),
+        lastMessageAt: serverTimestamp(),
         lastMessageSenderId: user1,
+        unreadCounts: {
+          [user1]: 0,
+          [user2]: increment(1),
+        },
       },
       { merge: true },
     );
+
+    await batch.commit();
 
     setText('');
   };

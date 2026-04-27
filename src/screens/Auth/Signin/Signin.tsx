@@ -10,13 +10,14 @@ import { Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import messaging from '@react-native-firebase/messaging';
 import { requestNotificationPermission } from '@/lib/permissions/permissions';
-import Toast from 'react-native-toast-message';
+import { ToastMessage } from '@/utils/toast';
 
 export default function Signin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const initFCM = async () => {
+    console.log('HERE');
     const hasPermission = await requestNotificationPermission();
     if (!hasPermission) return;
 
@@ -30,13 +31,13 @@ export default function Signin() {
   };
 
   const signinUser = async () => {
+    const token = await initFCM();
+
     const response = await signInWithEmailAndPassword(
       getAuth(),
       email,
       password,
     );
-
-    const token = await initFCM();
 
     await setDoc(
       doc(db, 'users', response.user.uid),
@@ -45,12 +46,6 @@ export default function Signin() {
       },
       { merge: true },
     );
-
-    return Toast.show({
-      type: 'success',
-      text1: 'Hello',
-      text2: 'This is some something 👋'
-    });
   };
 
   return (

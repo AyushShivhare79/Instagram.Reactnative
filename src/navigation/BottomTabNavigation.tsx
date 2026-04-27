@@ -8,6 +8,7 @@ import { Images } from '@/assets/images/index';
 import { Icons } from '@/assets/Icons';
 import { Avatar } from 'react-native-paper';
 import MessagesList from '@/screens/Messages/MessagesList/MessagesList';
+import Reels from '@/screens/Reels/Reels';
 
 export type BottomTabParamList = {
   Home: undefined;
@@ -50,7 +51,7 @@ export function BottomTabs() {
           tabBarIcon: ReelsIcon,
         }}
         name="Reels"
-        component={SearchTab}
+        component={Reels}
       />
       <Tab.Screen
         options={{

@@ -9,4 +9,6 @@ export interface Chat {
   lastMessageSenderId: string;
   participants: string[];
   otherUser?: AppUser;
+
+  unreadCounts: Record<string, number>;
 }
