@@ -9,6 +9,12 @@ import { textStyles } from '@/theme/typography/textStyles';
 import { styles } from './profilecomponent.styles';
 import { Images } from '@/assets/images';
 import { useAppSelector } from '@/hooks/redux';
+import { db } from '@/lib/firebase';
+import { arrayRemove, doc, setDoc } from '@react-native-firebase/firestore';
+import messaging from '@react-native-firebase/messaging';
+import { getAuth, signOut } from '@react-native-firebase/auth';
+import Toast from 'react-native-toast-message';
+import { ToastMessage } from '@/utils/toast';
 
 interface ProfileComponentProps {
   user: AppUser;
@@ -22,7 +28,28 @@ export default function ProfileComponent({
   navigation,
 }: ProfileComponentProps) {
   const me = useAppSelector(state => state.user.items);
+
   const isMe = user?.uid === me?.uid;
+
+  const onLogout = async () => {
+    if (!me) return;
+
+    const token = await messaging().getToken();
+
+    const removeToken = await setDoc(
+      doc(db, 'users', me.uid),
+      {
+        fcmTokens: arrayRemove(token),
+      },
+      { merge: true },
+    );
+    console.log('RemoveToken response: ', removeToken);
+
+    await signOut(getAuth());
+    return ToastMessage.success({
+      title: 'Logout successful!',
+    });
+  };
 
   return (
     <>
@@ -63,11 +90,20 @@ export default function ProfileComponent({
       </View>
 
       {isMe && (
-        <CustomButton
-          onPress={() => navigation.navigate('EditProfile')}
-          variant="outline"
-          title="Edit Profile"
-        />
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <CustomButton
+            style={{ flex: 1 }}
+            onPress={() => navigation.navigate('EditProfile')}
+            variant="outline"
+            title="Edit Profile"
+          />
+          <CustomButton
+            style={{ flex: 1 }}
+            onPress={onLogout}
+            variant="primary"
+            title="Logout"
+          />
+        </View>
       )}
     </>
   );
