@@ -4,7 +4,12 @@ import { Avatar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState } from 'react';
 import { Icons } from '@/assets/Icons/index';
-import firestore from '@react-native-firebase/firestore';
+import firestore, {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  writeBatch,
+} from '@react-native-firebase/firestore';
 import FastImage from '@d11/react-native-fast-image';
 import { styles } from './home.styles';
 import CustomButton from '@/components/CustomButton';
@@ -18,8 +23,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { vs } from '@/theme/responsive/responsive';
-import messaging from '@react-native-firebase/messaging';
-import { PermissionsAndroid, Platform } from 'react-native';
+import { db } from '@/lib/firebase';
 
 export const ICON_SIZE = FONT_SIZE['2xl'];
 
@@ -33,53 +37,49 @@ export default function Home() {
 
   const dispatch = useAppDispatch();
 
+
   const handleFollow = async (targetUserId: string) => {
-    try {
-      const currentUserId = user?.uid;
-      if (!currentUserId || !targetUserId) return;
+    const currentUserId = user?.uid;
+    if (!currentUserId || !targetUserId) return;
 
-      await firestore()
-        .collection('users')
-        .doc(currentUserId)
-        .update({
-          following: firestore.FieldValue.arrayUnion(targetUserId),
-        });
+    const batch = writeBatch(db);
 
-      await firestore()
-        .collection('users')
-        .doc(targetUserId)
-        .update({
-          followers: firestore.FieldValue.arrayUnion(currentUserId),
-        });
+    const currentUserRef = doc(db, 'users', currentUserId);
+    const targetUserRef = doc(db, 'users', targetUserId);
 
-      dispatch(followUser({ targetUserId }));
-    } catch (error) {
-      console.error('Follow error:', error);
-    }
+    batch.update(currentUserRef, {
+      following: arrayUnion(targetUserId),
+    });
+
+    batch.update(targetUserRef, {
+      followers: arrayUnion(currentUserId),
+    });
+
+    await batch.commit();
+
+    dispatch(followUser({ targetUserId }));
   };
 
   const handleUnfollow = async (targetUserId: string) => {
     try {
       const currentUserId = user?.uid;
-
       if (!currentUserId || !targetUserId) return;
 
-      const batch = firestore().batch();
+      const batch = writeBatch(db);
 
-      const currentUserRef = firestore().collection('users').doc(currentUserId);
-      const targetUserRef = firestore().collection('users').doc(targetUserId);
+      const currentUserRef = doc(db, 'users', currentUserId);
+      const targetUserRef = doc(db, 'users', targetUserId);
 
       batch.update(currentUserRef, {
-        following: firestore.FieldValue.arrayRemove(targetUserId),
+        following: arrayRemove(targetUserId),
       });
 
       batch.update(targetUserRef, {
-        followers: firestore.FieldValue.arrayRemove(currentUserId),
+        followers: arrayRemove(currentUserId),
       });
 
-      dispatch(unfollowUser({ targetUserId }));
-
-      await batch.commit();
+      await batch.commit(); // ✅ first DB success
+      dispatch(unfollowUser({ targetUserId })); // ✅ then update UI
     } catch (error) {
       console.error('Unfollow error:', error);
     }
@@ -124,32 +124,10 @@ export default function Home() {
     }
   };
 
-  const initFCM = async () => {
-    const hasPermission = await requestNotificationPermission();
-    if (!hasPermission) return;
-
-    const authStatus = await messaging().requestPermission();
-    console.log('Auth status:', authStatus);
-
-    const token = await messaging().getToken();
-    console.log('FCM Token:', token);
-  };
 
   useEffect(() => {
     getPosts();
 
-    initFCM();
-
-    // const getToken = async () => {
-    //   const granted = await requestNotificationPermission();
-
-    //   console.log('Trying to get token');
-    //   await messaging().requestPermission();
-    //   const token = await messaging().getToken();
-    //   console.log('FCM Token:', token);
-    // };
-
-    // getToken();
   }, []);
 
   const handleLike = async (postId: string, postLikes: string[]) => {
@@ -312,19 +290,3 @@ export default function Home() {
     </SafeAreaView>
   );
 }
-
-const requestNotificationPermission = async () => {
-  if (Platform.OS === 'android' && Platform.Version >= 33) {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-    );
-
-    console.log('Notification permission:', granted);
-
-    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('❌ Notification permission denied');
-      return false;
-    }
-  }
-  return true;
-};

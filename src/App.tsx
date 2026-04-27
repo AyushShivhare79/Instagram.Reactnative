@@ -9,8 +9,8 @@ export default function App() {
   return (
     <Provider store={store}>
       <PaperProvider>
-        <Toast />
         <MyStack />
+        <Toast />
       </PaperProvider>
     </Provider>
   );

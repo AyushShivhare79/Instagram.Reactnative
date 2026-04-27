@@ -37,6 +37,8 @@ export function MyStack() {
 
   useEffect(() => {
     auth().onAuthStateChanged(async item => {
+      if (!item?.uid) return setInitializing(false);
+
       const userData = await firestore()
         .collection('users')
         .doc(item?.uid)
@@ -84,14 +86,14 @@ const AuthStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Signup"
-        component={Signup}
-        options={{ header: SignupHeader }}
-      />
-      <Stack.Screen
         name="Signin"
         component={Signin}
         options={{ header: LoginHeader }}
+      />
+      <Stack.Screen
+        name="Signup"
+        component={Signup}
+        options={{ header: SignupHeader }}
       />
     </Stack.Navigator>
   );

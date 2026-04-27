@@ -6,16 +6,17 @@ import {
 } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { TouchableOpacity, View } from 'react-native';
-import { Text, TextInput } from 'react-native-paper';
+import { Divider, Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './signup.styles';
 import { COLORS } from '@/theme/color/color';
 import FastImage from '@d11/react-native-fast-image';
 import { Images } from '@/assets/images';
-import CustomButton from '@/components/CustomButton';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
-import { SignupSchema, signupSchema } from '@/schema/SignupSchema';
+import { SignupSchema, signupSchema } from '@/schema/Signup.schema';
+import messaging from '@react-native-firebase/messaging';
+import { requestNotificationPermission } from '@/lib/permissions/permissions';
 
 type SignupProps = NativeStackScreenProps<RootStackParamList, 'Signup'>;
 
@@ -28,6 +29,19 @@ export default function Signup({ navigation }: SignupProps) {
     resolver: zodResolver(signupSchema),
   });
 
+  const initFCM = async () => {
+    const hasPermission = await requestNotificationPermission();
+    if (!hasPermission) return;
+
+    const authStatus = await messaging().requestPermission();
+    console.log('Auth status:', authStatus);
+
+    const token = await messaging().getToken();
+    console.log('FCM Token:', token);
+
+    return token;
+  };
+
   const onSubmit = async (data: SignupSchema) => {
     const { username, name, email, password } = data;
 
@@ -37,7 +51,10 @@ export default function Signup({ navigation }: SignupProps) {
       password,
     );
 
+    const token = await initFCM();
+
     await firestore().collection('users').doc(response.user.uid).set({
+      fcmTokens: token,
       username: username,
       profilePicture: null,
       name: name,
@@ -51,7 +68,6 @@ export default function Signup({ navigation }: SignupProps) {
       createdAt: firestore.FieldValue.serverTimestamp(),
     });
   };
-
 
   const saveTokenToFirestore = async (token: string) => {
     const userId = user?.uid;
@@ -234,11 +250,19 @@ export default function Signup({ navigation }: SignupProps) {
           right: 50,
         }}
       >
-        <CustomButton
+        {/* <CustomButton
           onPress={() => navigation.navigate('Signin')}
           variant="outline"
           title="Create new account"
-        />
+        /> */}
+        <Divider />
+
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          <Text style={{ color: COLORS.black }}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
+            <Text style={{ color: COLORS.blue }}>Sign In.</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
