@@ -11,7 +11,7 @@ import MessagesList from '@/screens/Messages/MessagesList/MessagesList';
 import Reels from '@/screens/Reels/Reels';
 
 export type BottomTabParamList = {
-  Home: undefined;
+  HomeTab: undefined;
   Reels: undefined;
   MessageList: undefined;
   Search: undefined;
@@ -43,7 +43,7 @@ export function BottomTabs() {
         options={{
           tabBarIcon: HomeIcon,
         }}
-        name="Home"
+        name="HomeTab"
         component={Home}
       />
       <Tab.Screen

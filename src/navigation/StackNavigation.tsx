@@ -36,17 +36,30 @@ export function MyStack() {
   const user = useAppSelector(state => state.user.items);
 
   useEffect(() => {
-    auth().onAuthStateChanged(async item => {
-      if (!item?.uid) return setInitializing(false);
+    const unsubscribe = auth().onAuthStateChanged(async item => {
+      if (!item?.uid) {
+        setInitializing(false);
+        return;
+      }
 
-      const userData = await firestore()
-        .collection('users')
-        .doc(item?.uid)
-        .get();
+      const userDoc = await firestore().collection('users').doc(item.uid).get();
 
-      dispatch(setUser({ ...userData?.data(), uid: item?.uid }));
+      const data = userDoc.data();
+
+      const formattedUser = {
+        ...data,
+        uid: item.uid,
+        createdAt: data?.createdAt
+          ? data.createdAt.toDate().toISOString()
+          : null,
+      };
+
+      dispatch(setUser(formattedUser));
+
       if (initializing) setInitializing(false);
     });
+
+    return unsubscribe;
   }, [dispatch, initializing]);
 
   if (initializing) return null;

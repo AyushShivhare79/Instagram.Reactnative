@@ -24,6 +24,7 @@ export const COLORS = {
   black: '#000000',
   white: '#FFFFFF',
   blue: '#0000FF',
+  red: "#FF0000",
   paleGrey: '#f2f2f2',
   transparent: 'transparent',
 };

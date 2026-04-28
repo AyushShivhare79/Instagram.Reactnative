@@ -10,7 +10,6 @@ import { Text, TextInput } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import messaging from '@react-native-firebase/messaging';
 import { requestNotificationPermission } from '@/lib/permissions/permissions';
-import { ToastMessage } from '@/utils/toast';
 
 export default function Signin() {
   const [email, setEmail] = useState('');

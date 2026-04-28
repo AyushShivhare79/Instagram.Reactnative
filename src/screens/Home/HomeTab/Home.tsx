@@ -22,8 +22,9 @@ import { FONT_SIZE } from '@/theme/typography/fontSizes';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
-import { vs } from '@/theme/responsive/responsive';
 import { db } from '@/lib/firebase';
+import { Posts } from '@/types/post';
+import { COLORS } from '@/theme/color/color';
 
 export const ICON_SIZE = FONT_SIZE['2xl'];
 
@@ -32,11 +33,11 @@ export default function Home() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [status, setStatus] = useState();
+
   const user = useAppSelector(state => state.user.items);
   const posts = useAppSelector(state => state.posts.items);
 
   const dispatch = useAppDispatch();
-
 
   const handleFollow = async (targetUserId: string) => {
     const currentUserId = user?.uid;
@@ -78,8 +79,8 @@ export default function Home() {
         followers: arrayRemove(currentUserId),
       });
 
-      await batch.commit(); // ✅ first DB success
-      dispatch(unfollowUser({ targetUserId })); // ✅ then update UI
+      await batch.commit();
+      dispatch(unfollowUser({ targetUserId }));
     } catch (error) {
       console.error('Unfollow error:', error);
     }
@@ -92,10 +93,17 @@ export default function Home() {
         .orderBy('createdAt', 'desc')
         .get();
 
-      const rawPosts = postSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const rawPosts = postSnapshot.docs.map(doc => {
+        const data = doc.data();
+
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt
+            ? data.createdAt.toDate().toISOString()
+            : null,
+        };
+      });
 
       const userIds = [...new Set(rawPosts.map(post => post?.userId))];
 
@@ -107,7 +115,14 @@ export default function Home() {
 
       userDocs.forEach(doc => {
         if (doc.exists()) {
-          userMap[doc.id] = doc.data();
+          const data = doc.data();
+
+          userMap[doc.id] = {
+            ...data,
+            createdAt: data?.createdAt
+              ? data.createdAt.toDate().toISOString()
+              : null,
+          };
         }
       });
 
@@ -116,18 +131,14 @@ export default function Home() {
         user: userMap[post.userId] || null,
       }));
 
-      console.log('Final data: ', finalData);
       dispatch(setPosts(finalData));
-      // setPosts(finalData);
     } catch (error) {
       console.log('Error:', error);
     }
   };
 
-
   useEffect(() => {
     getPosts();
-
   }, []);
 
   const handleLike = async (postId: string, postLikes: string[]) => {
@@ -154,17 +165,109 @@ export default function Home() {
 
   const statusRender = () => {
     return (
-      <View style={{ padding: 8 }}>
+      <View style={styles.statusContainer}>
         <FlatList
+          data={status}
           horizontal={true}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.flatListStatusContainer}
-          data={status}
-          keyExtractor={(_, index) => String(index)}
           renderItem={({ item: _item }) => (
             <Avatar.Image size={70} source={Images.status} />
           )}
         />
+      </View>
+    );
+  };
+
+  if (!user) return navigation.navigate('Signin');
+
+  const renderPosts = ({ item }: { item: Posts }) => {
+    const currentUser = user;
+    const author = item.user;
+
+    const isMyPost = currentUser?.uid === author?.uid;
+    const isFollowing = currentUser?.following?.includes(author?.uid);
+    const isLiked = item?.likes?.includes(user?.uid);
+
+    const avatarUri =
+      item?.user?.profilePicture || (isMyPost ? user?.profilePicture : null);
+
+    return (
+      <View style={styles.renderPostsContainer}>
+        <View style={styles.postHeader}>
+          <View style={styles.postHeaderLeft}>
+            <Avatar.Image
+              size={40}
+              source={avatarUri ? { uri: avatarUri } : Images.defaultProfile}
+            />
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('ViewProfile', {
+                  id: item.user.uid,
+                })
+              }
+            >
+              <Text style={styles.usernameStyle}>{item.user.username}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.postHeaderRight}>
+            {!isMyPost && (
+              <CustomButton
+                onPress={() =>
+                  isFollowing
+                    ? handleUnfollow(item?.user.uid)
+                    : handleFollow(item?.user.uid)
+                }
+                variant="outline"
+                title={isFollowing ? 'Unfollow' : 'Follow'}
+              />
+            )}
+            <Icons.ThreeDotsIcon />
+          </View>
+        </View>
+
+        <View style={styles.imageOuterBox}>
+          <View style={styles.imageContainer}>
+            <FastImage
+              style={styles.image}
+              source={{
+                uri: item.image,
+                priority: FastImage.priority.normal,
+              }}
+              resizeMode={FastImage.resizeMode.cover}
+            />
+          </View>
+        </View>
+
+        <View style={styles.bottomContainer}>
+          <View style={styles.bottomIcons}>
+            <View style={styles.bottomLeftIcons}>
+              <TouchableOpacity onPress={() => handleLike(item.id, item.likes)}>
+                <Icons.HeartIcon
+                  size={ICON_SIZE}
+                  fill={isLiked ? COLORS.red : 'none'}
+                  stroke={isLiked ? 'none' : COLORS.black}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity>
+                <Icons.CommentIcon size={ICON_SIZE} />
+              </TouchableOpacity>
+
+              <TouchableOpacity>
+                <Icons.SendIcon size={ICON_SIZE} />
+              </TouchableOpacity>
+            </View>
+
+            <Icons.BookmarkIcon />
+          </View>
+
+          <View style={styles.captionContainer}>
+            <Text style={textStyles.semiBold}>{author.username} </Text>
+            <Text style={textStyles.sm}>{item.caption}</Text>
+          </View>
+        </View>
       </View>
     );
   };
@@ -175,116 +278,11 @@ export default function Home() {
 
       <View>
         <FlatList
-          contentContainerStyle={{ paddingBottom: vs(80) }}
+          contentContainerStyle={styles.flatListPostContainer}
           data={posts}
           keyExtractor={(_, index) => String(index)}
           ListHeaderComponent={statusRender}
-          renderItem={({ item }) => {
-            const isMe = user?.uid === item.userId;
-            const isFollow = user?.following?.includes(item?.user?.uid);
-            const isLiked = item?.likes?.includes(user?.uid);
-
-            return (
-              <View style={{ padding: 4, paddingBottom: 17 }}>
-                <View style={styles.postHeader}>
-                  <View style={styles.postHeaderLeft}>
-                    <Avatar.Image
-                      size={40}
-                      source={
-                        item?.user?.profilePicture
-                          ? { uri: item.user.profilePicture }
-                          : isMe && user?.profilePicture
-                          ? { uri: user.profilePicture }
-                          : Images.defaultProfile
-                      }
-                    />
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate('ViewProfile', {
-                          id: item.user.uid,
-                        })
-                      }
-                    >
-                      <Text style={textStyles.semiBold}>
-                        {item.user.username}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    {!isMe && (
-                      <CustomButton
-                        onPress={() =>
-                          isFollow
-                            ? handleUnfollow(item?.user.uid)
-                            : handleFollow(item?.user.uid)
-                        }
-                        variant="outline"
-                        title={isFollow ? 'Unfollow' : 'Follow'}
-                      />
-                    )}
-                    <Icons.ThreeDotsIcon />
-                  </View>
-                </View>
-
-                <View style={styles.imageOuterBox}>
-                  <View style={styles.imageContainer}>
-                    <FastImage
-                      style={styles.image}
-                      source={{
-                        uri: item.image,
-                        priority: FastImage.priority.normal,
-                      }}
-                      resizeMode={FastImage.resizeMode.cover}
-                    />
-                  </View>
-                </View>
-
-                <View
-                  style={{
-                    paddingHorizontal: 3,
-                    marginTop: 10,
-                  }}
-                >
-                  <View style={styles.bottomIcons}>
-                    <View style={styles.bottomLeftIcons}>
-                      <TouchableOpacity
-                        onPress={() => handleLike(item.id, item.likes)}
-                      >
-                        <Icons.HeartIcon
-                          size={ICON_SIZE}
-                          fill={isLiked ? 'red' : 'none'}
-                          stroke={isLiked ? 'none' : 'black'}
-                        />
-                      </TouchableOpacity>
-
-                      <TouchableOpacity>
-                        <Icons.CommentIcon size={ICON_SIZE} />
-                      </TouchableOpacity>
-
-                      <TouchableOpacity>
-                        <Icons.SendIcon size={ICON_SIZE} />
-                      </TouchableOpacity>
-                    </View>
-                    <Icons.BookmarkIcon />
-                  </View>
-
-                  <View style={{ flexDirection: 'row', paddingTop: 6 }}>
-                    <Text style={textStyles.semiBold}>
-                      {item.user.username}{' '}
-                    </Text>
-                    <Text style={textStyles.sm}>{item.caption}</Text>
-                  </View>
-                </View>
-              </View>
-            );
-          }}
+          renderItem={renderPosts}
         />
       </View>
     </SafeAreaView>
