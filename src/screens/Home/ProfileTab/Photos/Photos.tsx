@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import {
   collection,
@@ -12,7 +12,6 @@ import { styles } from './photos.styles';
 import { setUserPosts } from '@/redux/slices/postsSlice';
 import Loading from '@/components/Loading/loading';
 import { db } from '@/lib/firebase';
-import { useFocusEffect } from '@react-navigation/native';
 import AppImage from '@/components/Common/AppImage';
 import { Images } from '@/assets/images';
 import { serializeTimestamps } from '@/utils/firebaseHelper';
@@ -24,14 +23,6 @@ export default function Photos() {
   const posts = useAppSelector(state => state.posts.userPosts);
 
   const dispatch = useAppDispatch();
-
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        dispatch(setUserPosts(null));
-      };
-    }, [dispatch]),
-  );
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -80,7 +71,7 @@ export default function Photos() {
                     style={styles.image}
                     uri={item.image}
                     priority={'normal'}
-                    fallback={Images.postsFallback}
+                    fallbackSource={Images.postsFallback}
                   />
                 </View>
               </View>

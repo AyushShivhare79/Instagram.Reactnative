@@ -26,7 +26,6 @@ import { Posts } from '@/types/post';
 import { COLORS } from '@/theme/color/color';
 import { fetchPostsWithUsers } from '@/utils/firebaseHelper';
 import AppImage from '@/components/Common/AppImage';
-import FastImage from '@d11/react-native-fast-image';
 
 export const ICON_SIZE = FONT_SIZE['2xl'];
 
@@ -39,8 +38,8 @@ export default function Home() {
   const user = useAppSelector(state => state.user.items);
   const posts = useAppSelector(state => state.posts.items);
 
-  console.log("Posts: ", posts)
-  
+  console.log('Posts: ', posts);
+
   const dispatch = useAppDispatch();
 
   const handleFollow = async (targetUserId: string) => {

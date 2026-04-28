@@ -26,26 +26,29 @@ export default function Messages() {
   const route = useRoute<RouteProp<RootStackParamList, 'Message'>>();
   const user = useAppSelector(state => state.user.items);
 
-  const user2 = route.params?.user2;
-  const user1 = user?.uid!;
+  const otherUserId = route.params?.user2;
+  const currentUserId = user?.uid!;
 
   const [chatId, setChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState('');
 
   useEffect(() => {
-    if (!user2) return;
-    const id = user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
+    if (!otherUserId) return;
+    const id =
+      currentUserId < otherUserId
+        ? `${currentUserId}_${otherUserId}`
+        : `${otherUserId}_${currentUserId}`;
     setChatId(id);
 
     const readMessage = async () => {
       await updateDoc(doc(db, 'chats', chatId!), {
-        [`unreadCounts.${user1}`]: 0,
+        [`unreadCounts.${currentUserId}`]: 0,
       });
     };
 
     readMessage();
-  }, [user1, user2, chatId]);
+  }, [currentUserId, otherUserId, chatId]);
 
   useEffect(() => {
     if (!chatId) return;
@@ -54,7 +57,7 @@ export default function Messages() {
 
     chatRef.set(
       {
-        participants: [user1, user2],
+        participants: [currentUserId, otherUserId],
         createdAt: firestore.FieldValue.serverTimestamp(),
       },
       { merge: true },
@@ -88,7 +91,7 @@ export default function Messages() {
 
     batch.set(newMessageRef, {
       text,
-      senderId: user1,
+      senderId: currentUserId,
       createdAt: serverTimestamp(),
     });
 
@@ -97,10 +100,10 @@ export default function Messages() {
       {
         lastMessage: text,
         lastMessageAt: serverTimestamp(),
-        lastMessageSenderId: user1,
+        lastMessageSenderId: currentUserId,
         unreadCounts: {
-          [user1]: 0,
-          [user2]: increment(1),
+          [currentUserId]: 0,
+          [otherUserId]: increment(1),
         },
       },
       { merge: true },
@@ -121,7 +124,7 @@ export default function Messages() {
   };
 
   const renderItem = ({ item }: any) => {
-    const isMe = item.senderId === user1;
+    const isMe = item.senderId === currentUserId;
 
     return (
       <View

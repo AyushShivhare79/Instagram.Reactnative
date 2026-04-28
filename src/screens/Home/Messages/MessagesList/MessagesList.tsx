@@ -105,8 +105,7 @@ export default function MessagesList() {
           contentContainerStyle={{ gap: 10 }}
           data={searchedChats}
           renderItem={({ item }) => {
-            console.log('My user id: ', userId);
-            const unread = item.unreadCounts?.[userId];
+            const unread = item.unreadCounts?.[userId] ?? 0;
             return (
               <View style={styles.messageContainer}>
                 <TouchableOpacity
@@ -146,7 +145,10 @@ export default function MessagesList() {
                       ) : (
                         <Text style={styles.message}>{item.lastMessage}</Text>
                       )}
-                      <Text> • {formatTimeAgo(item.lastMessageAt)}</Text>
+                      <Text>
+                        {' • '}
+                        {formatTimeAgo(item.lastMessageAt) ?? ''}
+                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>

@@ -2,7 +2,7 @@ import { TextInput } from 'react-native-paper';
 import { View, Text, StyleProp, ViewStyle } from 'react-native';
 import React from 'react';
 import { useController, Control, FieldValues, Path } from 'react-hook-form';
-import { styles } from './form.styles';
+import { styles } from './forminput.styles';
 import { ms } from '@/theme/responsive/responsive';
 
 type AppInputProps<T extends FieldValues> = {

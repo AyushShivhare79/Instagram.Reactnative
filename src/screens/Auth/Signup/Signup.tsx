@@ -16,7 +16,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { SignupSchema, signupSchema } from '@/schema/Signup.schema';
 import { ToastMessage } from '@/utils/toast';
-import AppInput from '@/components/Form/Form';
+import AppInput from '@/components/Form/FormInput';
 
 type SignupProps = NativeStackScreenProps<RootStackParamList, 'Signup'>;
 

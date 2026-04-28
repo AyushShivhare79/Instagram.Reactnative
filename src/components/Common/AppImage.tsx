@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import FastImage, {
   FastImageProps,
   Priority,
@@ -6,7 +6,7 @@ import FastImage, {
 
 type AppImageProps = Omit<FastImageProps, 'source'> & {
   uri?: string;
-  fallbackSource?: number;
+  fallbackSource: number;
   priority?: 'low' | 'normal' | 'high';
 };
 
@@ -23,17 +23,21 @@ const AppImage: React.FC<AppImageProps> = ({
   resizeMode = FastImage.resizeMode.cover,
   ...rest
 }) => {
+  const [error, setError] = useState(false);
+
+  const source =
+    !uri || error
+      ? fallbackSource
+      : {
+          uri,
+          priority: priorityMap[priority],
+        };
+
   return (
     <FastImage
-      source={
-        uri
-          ? {
-              uri,
-              priority: priorityMap[priority],
-            }
-          : fallbackSource
-      }
+      source={source}
       resizeMode={resizeMode}
+      onError={() => setError(true)}
       {...rest}
     />
   );

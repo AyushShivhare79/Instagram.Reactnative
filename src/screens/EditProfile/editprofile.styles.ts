@@ -1,29 +1,34 @@
 import { COLORS } from '@/theme/color/color';
+import { hs, ms, vs } from '@/theme/responsive/responsive';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: ms(10),
+    paddingVertical: vs(10),
   },
+
   input: {
-    height: 40,
+    height: vs(40),
     borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 8,
+    backgroundColor: COLORS.transparent,
+    borderWidth: ms(1),
+    paddingHorizontal: hs(8),
+    borderRadius: ms(20),
   },
-  error: {
-    color: 'red',
-  },
-  profilePicture: { borderRadius: 999 },
+
+  profilePicture: { borderRadius: ms(999) },
+
   imageContainer: {
-    width: 120,
+    width: hs(120),
     backgroundColor: COLORS.paleGrey,
-    height: 120,
-    borderRadius: 16,
+    height: vs(120),
+    borderRadius: ms(16),
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   image: { width: '100%', height: '100%' },
 });
