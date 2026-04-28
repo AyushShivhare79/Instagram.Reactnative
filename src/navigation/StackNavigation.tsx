@@ -14,7 +14,7 @@ import { BottomTabs } from './BottomTabNavigation';
 import firestore from '@react-native-firebase/firestore';
 import EditProfile from '@/screens/EditProfile/EditProfile';
 import Profile from '@/screens/ViewProfile/ViewProfile';
-import Messages from '@/screens/Messages/Message/Message';
+import Messages from '@/screens/Home/Messages/Message/Message';
 import AppHeader from '@/components/AppHeader/AppHeader';
 
 export type RootStackParamList = {
@@ -99,14 +99,14 @@ const AuthStack = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Signin"
-        component={Signin}
-        options={{ header: LoginHeader }}
+        name="Signup"
+        options={{ header: SignupHeader }}
+        component={Signup}
       />
       <Stack.Screen
-        name="Signup"
-        component={Signup}
-        options={{ header: SignupHeader }}
+        name="Signin"
+        options={{ header: LoginHeader }}
+        component={Signin}
       />
     </Stack.Navigator>
   );

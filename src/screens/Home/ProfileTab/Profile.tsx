@@ -12,6 +12,7 @@ import ProfileHeader from '@/components/ProfileHeader/ProfileHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProfileComponent from '@/components/Profile/ProfileComponent';
 import Loading from '@/components/Loading/loading';
+import { setUserPosts } from '@/redux/slices/postsSlice';
 
 export default function Profile() {
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,8 @@ export default function Profile() {
 
       return () => {
         dispatch(setViewUserProfile(null));
+        dispatch(setUserPosts(null));
+
       };
     }, [dispatch, user]),
   );

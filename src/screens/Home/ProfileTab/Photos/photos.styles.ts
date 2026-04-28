@@ -3,7 +3,10 @@ import { hs, ms, vs } from '@/theme/responsive/responsive';
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: { padding: 5 },
+  container: { padding: ms(5) },
+
+  flatListStyle: { gap: ms(10) },
+
   imageContainer: {
     marginTop: vs(10),
     width: hs(124),
@@ -13,5 +16,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   image: { width: '100%', height: '100%' },
 });

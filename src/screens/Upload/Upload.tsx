@@ -1,6 +1,5 @@
-import FastImage from '@d11/react-native-fast-image';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Alert, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './upload.styles';
 import { COLORS } from '@/theme/color/color';
@@ -12,13 +11,16 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { addPosts } from '@/redux/slices/postsSlice';
+import { ToastMessage } from '@/utils/toast';
+import { serializeTimestamps } from '@/utils/firebaseHelper';
+import AppImage from '@/components/Common/AppImage';
 
 type UploadProps = NativeStackScreenProps<RootStackParamList, 'Upload'>;
 
 export default function Upload({ navigation }: UploadProps) {
   const [caption, setCaption] = useState('');
 
-  const route = useRoute<RouteProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'Upload'>>();
   const uri = route.params?.url;
 
   const user = useAppSelector(state => state.user.items);
@@ -26,14 +28,18 @@ export default function Upload({ navigation }: UploadProps) {
 
   const handleUpload = async () => {
     if (caption.length <= 0) {
-      return Alert.alert('Please enter caption!');
+      return ToastMessage.error({
+        title: 'Please enter caption!',
+      });
     }
 
     try {
       const response = await uploadToCloudinary(uri as string);
 
       if (!response) {
-        Alert.alert('Failed to upload!');
+        return ToastMessage.error({
+          title: 'Failed to upload!',
+        });
       }
 
       const newPost = {
@@ -41,22 +47,30 @@ export default function Upload({ navigation }: UploadProps) {
         likes: [],
         image: response,
         caption: caption,
-        createdAt: new Date(),
-        user: user,
+        createdAt: firestore.FieldValue.serverTimestamp(),
       };
 
       const uploadResonse = await firestore().collection('posts').add(newPost);
 
-      const updated = { id: uploadResonse.id, ...newPost };
-      console.log('Updated: ', updated);
+      const updated = {
+        id: uploadResonse.id,
+        user: user,
+        ...serializeTimestamps(newPost),
+      };
+
+      console.log('Updated one: ', updated);
 
       dispatch(addPosts(updated));
-      Alert.alert('Image uploaded!');
+      ToastMessage.success({
+        title: 'Post published!',
+      });
 
       return navigation.goBack();
     } catch (error) {
       console.error(error);
-      return Alert.alert('Something went wrong!');
+      return ToastMessage.success({
+        title: 'Something went wrong!',
+      });
     }
   };
 
@@ -65,14 +79,7 @@ export default function Upload({ navigation }: UploadProps) {
       <View style={styles.secondContainer}>
         <View style={styles.imagePosition}>
           <View style={styles.imageContainer}>
-            <FastImage
-              style={styles.image}
-              source={{
-                uri,
-                priority: FastImage.priority.normal,
-              }}
-              resizeMode={FastImage.resizeMode.cover}
-            />
+            <AppImage style={styles.image} uri={uri} priority={'normal'} />
           </View>
         </View>
 
@@ -83,6 +90,7 @@ export default function Upload({ navigation }: UploadProps) {
           placeholder="Add a caption..."
         />
       </View>
+
       <View style={styles.buttonPosition}>
         <CustomButton
           onPress={handleUpload}

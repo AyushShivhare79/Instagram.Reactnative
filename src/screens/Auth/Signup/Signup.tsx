@@ -1,4 +1,4 @@
-import { Controller, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   getAuth,
@@ -6,7 +6,7 @@ import {
 } from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { TouchableOpacity, View } from 'react-native';
-import { Divider, Text, TextInput } from 'react-native-paper';
+import { Divider, Text } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './signup.styles';
 import { COLORS } from '@/theme/color/color';
@@ -15,79 +15,55 @@ import { Images } from '@/assets/images';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { SignupSchema, signupSchema } from '@/schema/Signup.schema';
-import messaging from '@react-native-firebase/messaging';
-import { requestNotificationPermission } from '@/lib/permissions/permissions';
+import { ToastMessage } from '@/utils/toast';
+import AppInput from '@/components/Form/Form';
 
 type SignupProps = NativeStackScreenProps<RootStackParamList, 'Signup'>;
 
 export default function Signup({ navigation }: SignupProps) {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+  const { control, handleSubmit } = useForm({
     resolver: zodResolver(signupSchema),
   });
-
-  const initFCM = async () => {
-    const hasPermission = await requestNotificationPermission();
-    if (!hasPermission) return;
-
-    const authStatus = await messaging().requestPermission();
-    console.log('Auth status:', authStatus);
-
-    const token = await messaging().getToken();
-    console.log('FCM Token:', token);
-
-    return token;
-  };
 
   const onSubmit = async (data: SignupSchema) => {
     const { username, name, email, password } = data;
 
-    const response = await createUserWithEmailAndPassword(
-      getAuth(),
-      email,
-      password,
-    );
-
-    const token = await initFCM();
-
-    await firestore().collection('users').doc(response.user.uid).set({
-      fcmTokens: token,
-      username: username,
-      profilePicture: null,
-      name: name,
-      email: email,
-      following: [],
-      followers: [],
-      bio: null,
-      website: null,
-      gender: null,
-      uid: response.user.uid,
-      createdAt: firestore.FieldValue.serverTimestamp(),
-    });
-  };
-
-  const saveTokenToFirestore = async (token: string) => {
-    const userId = user?.uid;
-    if (!userId) return;
-
-    await firestore()
-      .collection('users')
-      .doc(userId)
-      .set(
-        {
-          fcmTokens: firestore.FieldValue.arrayUnion(token),
-        },
-        { merge: true },
+    try {
+      const response = await createUserWithEmailAndPassword(
+        getAuth(),
+        email,
+        password,
       );
+
+      await firestore().collection('users').doc(response.user.uid).set({
+        username: username,
+        profilePicture: null,
+        name: name,
+        email: email,
+        following: [],
+        followers: [],
+        bio: null,
+        website: null,
+        gender: null,
+        uid: response.user.uid,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+      });
+
+      return ToastMessage.success({
+        title: 'Signup successful!',
+      });
+    } catch (error) {
+      console.log(error);
+      return ToastMessage.error({
+        title: 'Error while signup!',
+      });
+    }
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ gap: 30, padding: 10 }}>
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.formContainer}>
+        <View style={styles.imageOuterBox}>
           <View style={styles.imageContainer}>
             <FastImage
               style={styles.image}
@@ -97,167 +73,59 @@ export default function Signup({ navigation }: SignupProps) {
           </View>
         </View>
 
-        <View style={{ gap: 10 }}>
-          <Controller
+        <View>
+          <AppInput
             control={control}
             name="username"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                mode="outlined"
-                outlineColor="#E0E0E0"
-                theme={{
-                  roundness: 30,
-                }}
-                autoCapitalize="none"
-                value={value}
-                onChangeText={onChange}
-                placeholder={'Username'}
-                textColor={COLORS.black}
-                style={styles.input}
-              />
-            )}
+            placeholder="Username"
+            style={styles.input}
           />
-          {errors.username && (
-            <Text style={styles.error}>{errors.username.message}</Text>
-          )}
 
-          <Controller
+          <AppInput
             control={control}
             name="name"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                mode="outlined"
-                outlineColor="#E0E0E0"
-                theme={{
-                  roundness: 30,
-                }}
-                autoCapitalize="none"
-                value={value}
-                onChangeText={onChange}
-                placeholder={'Name'}
-                textColor={COLORS.black}
-                style={styles.input}
-              />
-            )}
+            placeholder="Name"
+            style={styles.input}
           />
-          {errors.name && (
-            <Text style={styles.error}>{errors.name.message}</Text>
-          )}
 
-          <Controller
+          <AppInput
             control={control}
             name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                mode="outlined"
-                outlineColor="#E0E0E0"
-                theme={{
-                  roundness: 30,
-                }}
-                autoCapitalize="none"
-                value={value}
-                onChangeText={onChange}
-                placeholder={'Email'}
-                textColor={COLORS.black}
-                style={styles.input}
-              />
-            )}
+            placeholder="Email"
+            style={styles.input}
           />
-          {errors.email && (
-            <Text style={styles.error}>{errors.email.message}</Text>
-          )}
 
-          <Controller
+          <AppInput
             control={control}
             name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                mode="outlined"
-                outlineColor="#E0E0E0"
-                theme={{
-                  roundness: 30,
-                }}
-                secureTextEntry={true}
-                autoCapitalize="none"
-                value={value}
-                onChangeText={onChange}
-                placeholder={'Password'}
-                textColor={COLORS.black}
-                style={styles.input}
-              />
-            )}
+            placeholder="Password"
+            secureTextEntry
+            style={styles.input}
           />
-          {errors.password && (
-            <Text style={styles.error}>{errors.password.message}</Text>
-          )}
 
-          <Controller
+          <AppInput
             control={control}
             name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                mode="outlined"
-                outlineColor="#E0E0E0"
-                theme={{
-                  roundness: 30,
-                }}
-                secureTextEntry={true}
-                autoCapitalize="none"
-                value={value}
-                onChangeText={onChange}
-                placeholder={'Confirm Password'}
-                textColor={COLORS.black}
-                style={styles.input}
-              />
-            )}
+            placeholder="Confirm Password"
+            secureTextEntry
+            style={styles.input}
           />
-          {errors.name && (
-            <Text style={styles.error}>{errors.name.message}</Text>
-          )}
 
-          <View
-            style={{
-              width: '100%',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
+          <View style={styles.buttonContainer}>
             <TouchableOpacity
               onPress={handleSubmit(onSubmit)}
-              style={{
-                backgroundColor: 'blue',
-                justifyContent: 'center',
-                alignItems: 'center',
-                padding: 10,
-                width: '80%',
-                borderRadius: 50,
-              }}
+              style={styles.button}
             >
-              <Text style={{ color: 'white' }} variant="titleMedium">
-                Signup
-              </Text>
+              <Text style={{ color: COLORS.white }}>Signup</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
-      <View
-        style={{
-          padding: 7,
-          position: 'absolute',
-          bottom: 50,
-          left: 50,
-          right: 50,
-        }}
-      >
-        {/* <CustomButton
-          onPress={() => navigation.navigate('Signin')}
-          variant="outline"
-          title="Create new account"
-        /> */}
+      <View style={styles.bottomContainer}>
         <Divider />
 
-        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+        <View style={styles.bottomTextAlign}>
           <Text style={{ color: COLORS.black }}>Already have an account? </Text>
           <TouchableOpacity onPress={() => navigation.navigate('Signin')}>
             <Text style={{ color: COLORS.blue }}>Sign In.</Text>

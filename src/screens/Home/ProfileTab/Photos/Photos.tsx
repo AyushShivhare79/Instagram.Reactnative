@@ -1,11 +1,21 @@
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, View } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
-import FastImage from '@d11/react-native-fast-image';
+import {
+  collection,
+  FirebaseFirestoreTypes,
+  getDocs,
+  query,
+  where,
+} from '@react-native-firebase/firestore';
 import { styles } from './photos.styles';
 import { setUserPosts } from '@/redux/slices/postsSlice';
 import Loading from '@/components/Loading/loading';
+import { db } from '@/lib/firebase';
+import { useFocusEffect } from '@react-navigation/native';
+import AppImage from '@/components/Common/AppImage';
+import { Images } from '@/assets/images';
+import { serializeTimestamps } from '@/utils/firebaseHelper';
 
 export default function Photos() {
   const [loading, setLoading] = useState(true);
@@ -15,58 +25,69 @@ export default function Photos() {
 
   const dispatch = useAppDispatch();
 
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        dispatch(setUserPosts(null));
+      };
+    }, [dispatch]),
+  );
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const snapshot = await firestore()
-          .collection('posts')
-          .where('userId', '==', userId)
-          .orderBy('createdAt', 'desc')
-          .get();
+        if (!userId) return;
 
-        if (!snapshot.docs) return;
+        const q = query(collection(db, 'posts'), where('userId', '==', userId));
+
+        const snapshot: FirebaseFirestoreTypes.QuerySnapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          dispatch(setUserPosts(null));
+          return;
+        }
 
         const postsData = snapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc?._data,
+          ...serializeTimestamps(doc.data()),
         }));
 
         dispatch(setUserPosts(postsData));
-        setLoading(false);
       } catch (error) {
         console.log(error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPost();
   }, [userId, dispatch]);
 
-  if (loading) {
-    return <Loading />;
-  }
   return (
     <View style={styles.container}>
-      <FlatList
-        columnWrapperStyle={{ gap: 10 }}
-        numColumns={3}
-        data={posts}
-        renderItem={({ item }) => {
-          return (
-            <View>
-              <View style={styles.imageContainer}>
-                <FastImage
-                  style={styles.image}
-                  source={{
-                    uri: item?.image,
-                    priority: FastImage.priority.normal,
-                  }}
-                  resizeMode={FastImage.resizeMode.cover}
-                />
+      {loading ? (
+        <Loading />
+      ) : (
+        <FlatList
+          columnWrapperStyle={styles.flatListStyle}
+          numColumns={3}
+          data={posts}
+          renderItem={({ item }) => {
+            return (
+              <View>
+                <View style={styles.imageContainer}>
+                  <AppImage
+                    style={styles.image}
+                    uri={item.image}
+                    priority={'normal'}
+                    fallback={Images.postsFallback}
+                  />
+                </View>
               </View>
-            </View>
-          );
-        }}
-      />
+            );
+          }}
+        />
+      )}
     </View>
   );
 }

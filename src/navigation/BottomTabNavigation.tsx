@@ -7,7 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Images } from '@/assets/images/index';
 import { Icons } from '@/assets/Icons';
 import { Avatar } from 'react-native-paper';
-import MessagesList from '@/screens/Messages/MessagesList/MessagesList';
+import MessagesList from '@/screens/Home/Messages/MessagesList/MessagesList';
 import Reels from '@/screens/Reels/Reels';
 
 export type BottomTabParamList = {

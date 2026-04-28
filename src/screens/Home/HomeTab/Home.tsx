@@ -10,7 +10,6 @@ import firestore, {
   doc,
   writeBatch,
 } from '@react-native-firebase/firestore';
-import FastImage from '@d11/react-native-fast-image';
 import { styles } from './home.styles';
 import CustomButton from '@/components/CustomButton';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
@@ -25,6 +24,9 @@ import { RootStackParamList } from '@/navigation/StackNavigation';
 import { db } from '@/lib/firebase';
 import { Posts } from '@/types/post';
 import { COLORS } from '@/theme/color/color';
+import { fetchPostsWithUsers } from '@/utils/firebaseHelper';
+import AppImage from '@/components/Common/AppImage';
+import FastImage from '@d11/react-native-fast-image';
 
 export const ICON_SIZE = FONT_SIZE['2xl'];
 
@@ -37,6 +39,8 @@ export default function Home() {
   const user = useAppSelector(state => state.user.items);
   const posts = useAppSelector(state => state.posts.items);
 
+  console.log("Posts: ", posts)
+  
   const dispatch = useAppDispatch();
 
   const handleFollow = async (targetUserId: string) => {
@@ -86,60 +90,14 @@ export default function Home() {
     }
   };
 
-  const getPosts = async () => {
-    try {
-      const postSnapshot = await firestore()
-        .collection('posts')
-        .orderBy('createdAt', 'desc')
-        .get();
-
-      const rawPosts = postSnapshot.docs.map(doc => {
-        const data = doc.data();
-
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt
-            ? data.createdAt.toDate().toISOString()
-            : null,
-        };
-      });
-
-      const userIds = [...new Set(rawPosts.map(post => post?.userId))];
-
-      const userDocs = await Promise.all(
-        userIds.map(id => firestore().collection('users').doc(id).get()),
-      );
-
-      const userMap = {};
-
-      userDocs.forEach(doc => {
-        if (doc.exists()) {
-          const data = doc.data();
-
-          userMap[doc.id] = {
-            ...data,
-            createdAt: data?.createdAt
-              ? data.createdAt.toDate().toISOString()
-              : null,
-          };
-        }
-      });
-
-      const finalData = rawPosts.map(post => ({
-        ...post,
-        user: userMap[post.userId] || null,
-      }));
-
-      dispatch(setPosts(finalData));
-    } catch (error) {
-      console.log('Error:', error);
-    }
-  };
-
   useEffect(() => {
-    getPosts();
-  }, []);
+    const load = async () => {
+      const data = await fetchPostsWithUsers();
+      dispatch(setPosts(data));
+    };
+
+    load();
+  }, [dispatch]);
 
   const handleLike = async (postId: string, postLikes: string[]) => {
     try {
@@ -229,13 +187,11 @@ export default function Home() {
 
         <View style={styles.imageOuterBox}>
           <View style={styles.imageContainer}>
-            <FastImage
+            <AppImage
               style={styles.image}
-              source={{
-                uri: item.image,
-                priority: FastImage.priority.normal,
-              }}
-              resizeMode={FastImage.resizeMode.cover}
+              uri={item.image}
+              priority={'normal'}
+              fallback={Images.postsFallback}
             />
           </View>
         </View>
