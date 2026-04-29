@@ -8,13 +8,13 @@ import FastImage from '@d11/react-native-fast-image';
 import { textStyles } from '@/theme/typography/textStyles';
 import { styles } from './profilecomponent.styles';
 import { Images } from '@/assets/images';
-import { useAppSelector } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { db } from '@/lib/firebase';
 import { arrayRemove, doc, setDoc } from '@react-native-firebase/firestore';
 import messaging from '@react-native-firebase/messaging';
 import { getAuth, signOut } from '@react-native-firebase/auth';
-import Toast from 'react-native-toast-message';
 import { ToastMessage } from '@/utils/toast';
+import { setUser } from '@/redux/slices/userSlice';
 
 interface ProfileComponentProps {
   user: AppUser;
@@ -28,8 +28,9 @@ export default function ProfileComponent({
   navigation,
 }: ProfileComponentProps) {
   const me = useAppSelector(state => state.user.items);
-
   const isMe = user?.uid === me?.uid;
+
+  const dispatch = useAppDispatch();
 
   const onLogout = async () => {
     if (!me) return;
@@ -43,9 +44,11 @@ export default function ProfileComponent({
       },
       { merge: true },
     );
-    console.log('RemoveToken response: ', removeToken);
+
+    console.log('Removed token response: ', removeToken);
 
     await signOut(getAuth());
+    dispatch(setUser(null));
     return ToastMessage.success({
       title: 'Logout successful!',
     });
@@ -89,7 +92,7 @@ export default function ProfileComponent({
         <Text style={textStyles.sm}>{user?.bio || 'No bio'}</Text>
       </View>
 
-      {isMe && (
+      {isMe ? (
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <CustomButton
             style={{ flex: 1 }}
@@ -102,6 +105,14 @@ export default function ProfileComponent({
             onPress={onLogout}
             variant="primary"
             title="Logout"
+          />
+        </View>
+      ) : (
+        <View>
+          <CustomButton
+            onPress={() => navigation.navigate('Message', { user2: user.uid })}
+            variant="primary"
+            title="Message"
           />
         </View>
       )}

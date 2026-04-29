@@ -7,7 +7,6 @@ import firestore from '@react-native-firebase/firestore';
 import { styles } from './search.styles';
 import { Images } from '@/assets/images';
 import { useAppSelector } from '@/hooks/redux';
-import { textStyles } from '@/theme/typography/textStyles';
 import { FONT_SIZE } from '@/theme/typography/fontSizes';
 import { COLORS } from '@/theme/color/color';
 

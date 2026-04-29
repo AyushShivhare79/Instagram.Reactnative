@@ -9,27 +9,46 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import firestore from '@react-native-firebase/firestore';
+import firestore, {
+  collection,
+  doc,
+  increment,
+  serverTimestamp,
+  updateDoc,
+  writeBatch,
+} from '@react-native-firebase/firestore';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { useAppSelector } from '@/hooks/redux';
+import { db } from '@/lib/firebase';
 
 export default function Messages() {
   const route = useRoute<RouteProp<RootStackParamList, 'Message'>>();
   const user = useAppSelector(state => state.user.items);
 
-  const user2 = route.params?.user2;
-  const user1 = user?.uid!;
+  const otherUserId = route.params?.user2;
+  const currentUserId = user?.uid!;
 
   const [chatId, setChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState('');
 
   useEffect(() => {
-    if (!user2) return;
-    const id = user1 < user2 ? `${user1}_${user2}` : `${user2}_${user1}`;
+    if (!otherUserId) return;
+    const id =
+      currentUserId < otherUserId
+        ? `${currentUserId}_${otherUserId}`
+        : `${otherUserId}_${currentUserId}`;
     setChatId(id);
-  }, [user1, user2]);
+
+    const readMessage = async () => {
+      await updateDoc(doc(db, 'chats', chatId!), {
+        [`unreadCounts.${currentUserId}`]: 0,
+      });
+    };
+
+    readMessage();
+  }, [currentUserId, otherUserId, chatId]);
 
   useEffect(() => {
     if (!chatId) return;
@@ -38,7 +57,7 @@ export default function Messages() {
 
     chatRef.set(
       {
-        participants: [user1, user2],
+        participants: [currentUserId, otherUserId],
         createdAt: firestore.FieldValue.serverTimestamp(),
       },
       { merge: true },
@@ -53,6 +72,7 @@ export default function Messages() {
           id: doc.id,
           ...doc.data(),
         }));
+
         setMessages(msgs);
       });
 
@@ -62,24 +82,34 @@ export default function Messages() {
   const sendMessage = async () => {
     if (!text.trim() || !chatId) return;
 
-    const chatRef = firestore().collection('chats').doc(chatId);
+    const chatRef = doc(db, 'chats', chatId);
+    const messagesRef = collection(chatRef, 'messages');
 
-    const messageData = {
+    const batch = writeBatch(db);
+
+    const newMessageRef = doc(messagesRef);
+
+    batch.set(newMessageRef, {
       text,
-      senderId: user1,
-      createdAt: firestore.FieldValue.serverTimestamp(),
-    };
+      senderId: currentUserId,
+      createdAt: serverTimestamp(),
+    });
 
-    await chatRef.collection('messages').add(messageData);
-
-    await chatRef.set(
+    batch.set(
+      chatRef,
       {
         lastMessage: text,
-        lastMessageAt: firestore.FieldValue.serverTimestamp(),
-        lastMessageSenderId: user1,
+        lastMessageAt: serverTimestamp(),
+        lastMessageSenderId: currentUserId,
+        unreadCounts: {
+          [currentUserId]: 0,
+          [otherUserId]: increment(1),
+        },
       },
       { merge: true },
     );
+
+    await batch.commit();
 
     setText('');
   };
@@ -94,7 +124,7 @@ export default function Messages() {
   };
 
   const renderItem = ({ item }: any) => {
-    const isMe = item.senderId === user1;
+    const isMe = item.senderId === currentUserId;
 
     return (
       <View

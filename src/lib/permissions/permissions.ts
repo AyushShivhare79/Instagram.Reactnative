@@ -8,6 +8,10 @@ import {
 import { Platform } from 'react-native';
 
 export const requestNotificationPermission = async () => {
+  if (Platform.OS === 'android' && Platform.Version < 33) {
+    return true;
+  }
+
   const permission =
     Platform.OS === 'android'
       ? PERMISSIONS.ANDROID.POST_NOTIFICATIONS
@@ -25,8 +29,5 @@ export const requestNotificationPermission = async () => {
 
   const result = await request(permission);
 
-  if (result === RESULTS.GRANTED) return true;
-
-  console.log('❌ Notification permission denied');
-  return false;
+  return result === RESULTS.GRANTED;
 };

@@ -11,6 +11,8 @@ import { useCallback, useState } from 'react';
 import ProfileHeader from '@/components/ProfileHeader/ProfileHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ProfileComponent from '@/components/Profile/ProfileComponent';
+import Loading from '@/components/Loading/loading';
+import { setUserPosts } from '@/redux/slices/postsSlice';
 
 export default function Profile() {
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,7 @@ export default function Profile() {
   const user = useAppSelector(state => state.user.items);
   const posts = useAppSelector(state => state.posts.userPosts);
 
+
   useFocusEffect(
     useCallback(() => {
       dispatch(setViewUserProfile(user));
@@ -30,23 +33,32 @@ export default function Profile() {
 
       return () => {
         dispatch(setViewUserProfile(null));
+        dispatch(setUserPosts(null));
       };
     }, [dispatch, user]),
   );
 
   return (
-    <>
-      <SafeAreaView style={styles.container}>
-        <ProfileHeader />
+    <SafeAreaView style={styles.container}>
+      {loading ? (
+        <Loading />
+      ) : (
+        <>
+          <ProfileHeader />
 
-        <ProfileComponent user={user!} posts={posts!} navigation={navigation} />
+          <ProfileComponent
+            user={user!}
+            posts={posts!}
+            navigation={navigation}
+          />
 
-        <Divider />
+          <Divider />
 
-        <View style={styles.bottomSection}>
-          <TopTabs />
-        </View>
-      </SafeAreaView>
-    </>
+          <View style={styles.bottomSection}>
+            <TopTabs />
+          </View>
+        </>
+      )}
+    </SafeAreaView>
   );
 }

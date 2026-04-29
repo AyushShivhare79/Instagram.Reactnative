@@ -1,6 +1,4 @@
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import FastImage from '@d11/react-native-fast-image';
-import { Button, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './editprofile.styles';
 import { openLibrary } from '@/components/HomeHeader/HomeHeader';
@@ -8,13 +6,16 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/navigation/StackNavigation';
 import { useState } from 'react';
 import CustomButton from '@/components/CustomButton';
-import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import firestore from '@react-native-firebase/firestore';
-import { TextInput } from 'react-native-paper';
 import { uploadToCloudinary } from '@/lib/cloudnary';
 import { updateProfilePicture } from '@/redux/slices/userSlice';
+import AppInput from '@/components/Form/FormInput';
+import AppImage from '@/components/Common/AppImage';
+import { Images } from '@/assets/images';
 import { editProfileSchema } from '@/schema/EditProfile.schema';
+import { useForm } from 'react-hook-form';
+import { TouchableOpacity, View } from 'react-native';
 
 type EditProfileProps = NativeStackScreenProps<
   RootStackParamList,
@@ -42,9 +43,7 @@ export default function EditProfile({ navigation }: EditProfileProps) {
     resolver: zodResolver(editProfileSchema),
   });
 
-  const onSubmit = async data => {};
-
-  const testing = async () => {
+  const onSubmit = async data => {
     try {
       const currentUserId = user?.uid;
       if (!currentUserId) return;
@@ -58,6 +57,7 @@ export default function EditProfile({ navigation }: EditProfileProps) {
       });
 
       dispatch(updateProfilePicture(response));
+      navigation.goBack();
     } catch (error) {
       console.log('Error updating profile picture:', error);
     }
@@ -66,94 +66,40 @@ export default function EditProfile({ navigation }: EditProfileProps) {
   const renderForm = () => {
     return (
       <>
-        <Controller
+        <AppInput
+          style={styles.input}
           control={control}
           name="name"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Name"
-              style={styles.input}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              placeholder="Enter your name"
-            />
-          )}
+          placeholder="Name"
         />
-        {errors.name && <Text style={styles.error}>{errors.name.message}</Text>}
 
-        <Controller
+        <AppInput
+          style={styles.input}
           control={control}
           name="username"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Username"
-              style={styles.input}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              placeholder="Enter your email"
-            />
-          )}
+          placeholder="Username"
         />
-        {errors.username && (
-          <Text style={styles.error}>{errors.username.message}</Text>
-        )}
 
-        <Controller
+        <AppInput
+          style={styles.input}
           control={control}
           name="bio"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Bio"
-              style={styles.input}
-              onBlur={onBlur}
-              onChangeText={val => onChange(val ? parseInt(val, 10) : '')}
-              value={value}
-              placeholder="Enter your age"
-              keyboardType="default"
-            />
-          )}
+          placeholder="Bio"
         />
-        {errors.bio && <Text style={styles.error}>{errors.bio.message}</Text>}
 
-        <Controller
+        <AppInput
+          style={styles.input}
           control={control}
           name="website"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Website"
-              style={styles.input}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              placeholder="Enter your email"
-            />
-          )}
+          placeholder="Website"
         />
-        {errors.username && (
-          <Text style={styles.error}>{errors.username.message}</Text>
-        )}
 
-        <Controller
+        <AppInput
+          style={styles.input}
           control={control}
           name="gender"
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              label="Gender"
-              style={styles.input}
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-              placeholder="Enter your email"
-            />
-          )}
+          placeholder="Gender"
         />
-        {errors.username && (
-          <Text style={styles.error}>{errors.username.message}</Text>
-        )}
-
-        <CustomButton title="Save" onPress={handleSubmit(onSubmit)} />
       </>
     );
   };
@@ -168,15 +114,16 @@ export default function EditProfile({ navigation }: EditProfileProps) {
         }}
       >
         <TouchableOpacity onPress={handleChange} style={styles.imageContainer}>
-          <FastImage
+          <AppImage
             style={[styles.image, styles.profilePicture]}
-            source={{ uri: uri || user?.profilePicture! }}
-            resizeMode={FastImage.resizeMode.cover}
+            uri={uri || user?.profilePicture!}
+            fallbackSource={Images.defaultProfile}
           />
         </TouchableOpacity>
-        <Button onPress={testing} title="Test" />
       </View>
-      <View style={{}}>{renderForm()}</View>
+
+      <View style={{ justifyContent: 'center', flex: 1 }}>{renderForm()}</View>
+      <CustomButton title="Save" onPress={handleSubmit(onSubmit)} />
     </SafeAreaView>
   );
 }
